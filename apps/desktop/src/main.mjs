@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { tsImport } from 'tsx/esm/api'
 
 const currentDir = dirname(fileURLToPath(import.meta.url))
-const repoRoot = resolve(currentDir, '../../..')
+const repoRoot = app.isPackaged ? resolve(currentDir, '..') : resolve(currentDir, '../../..')
 
 let apiServer
 let mainWindow

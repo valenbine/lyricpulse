@@ -30,7 +30,7 @@
     "files": [
       {
         "from": ".",
-        "to": "apps/desktop",
+        "to": ".",
         "filter": ["package.json", "src/**/*"]
       },
       {
@@ -64,9 +64,6 @@
         "filter": ["package.json", "tsconfig.base.json"]
       }
     ],
-    "extraMetadata": {
-      "main": "apps/desktop/src/main.mjs"
-    },
     "asarUnpack": [
       "apps/web/dist/**/*"
     ],
