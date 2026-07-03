@@ -24,10 +24,10 @@ export function ComicPop({ config }: { config: LyricVideoConfig }) {
         <div style={{ position: 'absolute', left: isWide ? 95 : 52, top: isWide ? 115 : 120, width: isWide ? 640 : 900, height: isWide ? 500 : 700, clipPath: 'polygon(50% 0, 60% 28%, 100% 18%, 72% 48%, 96% 78%, 60% 68%, 48% 100%, 38% 68%, 0 80%, 26% 48%, 0 18%, 38% 28%)', background: '#F8FAFC', transform: `rotate(${Math.sin(frame / 30) * 3}deg) scale(${1 + analysisFrame.bass * 0.04})`, boxShadow: '0 30px 90px rgba(0,0,0,0.32)' }} />
         <FloatingCover config={config} left={isWide ? 190 : (1080 - coverSize) / 2} top={isWide ? 285 : 250} size={coverSize} radius={26} rotate={-6} scale={1 + analysisFrame.bass * 0.04} />
         <div style={{ position: 'absolute', left: isWide ? 680 : 70, right: isWide ? 105 : 70, top: isWide ? 180 : 790, color: '#020617', fontSize: isWide ? 88 : 92, fontWeight: 950, letterSpacing: '-0.08em', lineHeight: 0.88, textShadow: '5px 5px 0 #F8FAFC' }}>
-          {config.title ?? 'LyricPulse'}
+          {config.title ?? ' '}
         </div>
         <div style={{ position: 'absolute', left: isWide ? 680 : 40, right: isWide ? 105 : 40, top: isWide ? 500 : 1190, boxSizing: 'border-box', maxHeight: isWide ? 250 : 320, overflow: 'hidden', padding: isWide ? '34px 42px' : '42px 44px', border: '6px solid rgba(2,6,23,0.55)', borderRadius: 32, background: 'rgba(248,250,252,0.68)', color: '#020617', fontSize: isWide ? 70 : 72, fontWeight: 950, lineHeight: 1, boxShadow: isWide ? '10px 10px 0 rgba(2,6,23,0.2)' : '6px 6px 0 rgba(2,6,23,0.16)' }}>
-          {lyricLine?.text ?? 'LyricPulse'}
+          {lyricLine?.text ?? ' '}
         </div>
       </div>
     </TemplateShell>

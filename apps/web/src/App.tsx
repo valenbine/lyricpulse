@@ -435,6 +435,10 @@ const templateCopy: Record<TemplateId, { label: string; description: string }> =
       label: '糖果玻璃',
       description: '半透明糖果材质、柔彩折射和甜亮视觉，适合甜歌和少女流行。'
     },
+    RosePostcard: {
+      label: '玫瑰明信片',
+      description: '暖粉情书纸面、玫瑰邮戳和轻心形漂浮，适合甜歌、告白和恋爱主题。'
+    },
     IndustrialFurnace: {
       label: '工业熔炉',
       description: '钢铁结构、火花和热浪光，适合金属、摇滚和重节奏。'
@@ -840,6 +844,7 @@ export function App() {
     try {
       const created = await createRenderJob(project.id, {
         ratio,
+        renderQuality: 'standard',
         templateId,
         title: project.title ?? toOptionalInputValue(title, defaultSongTitle),
         artist: project.artist ?? effectiveArtist,
@@ -2226,12 +2231,12 @@ function RenderPanel({
                         : 'border-white/10 text-muted-foreground hover:border-accent/40 hover:bg-accent/10 hover:text-foreground'
                     )}
                     onClick={() => onSelectRenderJob(item)}
-                  >
-                    <span>
-                      {templateCopy[item.config.templateId].label} · {item.config.ratio} · {translateRenderStatus(item.status)}
-                      {item.status === 'rendering' || item.status === 'created'
-                        ? ` · ${Math.round(item.progress * 100)}%`
-                        : ''}
+                    >
+                      <span>
+                        {templateCopy[item.config.templateId].label} · {item.config.ratio} · {translateRenderStatus(item.status)}
+                        {item.status === 'rendering' || item.status === 'created'
+                          ? ` · ${Math.round(item.progress * 100)}%`
+                          : ''}
                     </span>
                     <span>{formatDateTime(item.updatedAt)}</span>
                   </button>

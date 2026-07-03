@@ -1,3 +1,4 @@
+import { availableParallelism } from 'node:os'
 import { mkdir } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -8,11 +9,22 @@ import {
   selectComposition
 } from '@remotion/renderer'
 import type { RenderMediaOnProgress } from '@remotion/renderer'
-import type { LyricVideoConfig } from '@lyricpulse/core'
+import type { LyricVideoConfig, RenderQuality } from '@lyricpulse/core'
 import { getCompositionId, getRenderDimensions } from './dimensions'
 import { getDurationInFrames } from './helpers'
 
 const currentDir = dirname(fileURLToPath(import.meta.url))
+
+function getRenderConcurrency(_quality: RenderQuality = 'standard') {
+  const cpuCount = Math.max(1, availableParallelism())
+  const configuredConcurrency = Number(process.env.RENDER_CONCURRENCY)
+
+  if (Number.isFinite(configuredConcurrency) && configuredConcurrency > 0) {
+    return Math.min(cpuCount, Math.floor(configuredConcurrency))
+  }
+
+  return cpuCount
+}
 
 export type RenderLyricVideoInput = {
   config: LyricVideoConfig
@@ -30,6 +42,7 @@ export async function renderLyricVideo(input: RenderLyricVideoInput) {
     input.config.templateId,
     input.config.ratio
   )
+  const renderQuality = input.config.renderQuality ?? 'standard'
   const inputProps = { config: input.config }
   const { cancelSignal, cancel } = makeCancelSignal()
   input.onCancel?.(cancel)
@@ -43,11 +56,11 @@ export async function renderLyricVideo(input: RenderLyricVideoInput) {
     serveUrl,
     composition: {
       ...composition,
-      ...getRenderDimensions(input.config.ratio),
+      ...getRenderDimensions(input.config.ratio, renderQuality),
       durationInFrames: getDurationInFrames(input.config, composition.fps)
     },
     codec: 'h264',
-    concurrency: 1,
+    concurrency: getRenderConcurrency(renderQuality),
     outputLocation: input.outputLocation,
     inputProps,
     cancelSignal,

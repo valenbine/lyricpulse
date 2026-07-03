@@ -58,7 +58,7 @@ export function OrigamiCinema({ config }: { config: LyricVideoConfig }) {
             color: '#F8FAFC'
           }}
         >
-          {config.title ?? 'LyricPulse'}
+          {config.title ?? ' '}
         </div>
         <CaptionPanel
           config={config}

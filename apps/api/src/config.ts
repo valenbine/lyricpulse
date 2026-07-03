@@ -12,6 +12,8 @@ export type ApiConfig = {
   renderLyricVideo?: typeof import('@lyricpulse/video/render').renderLyricVideo
   muxVideoWithAudio?: typeof import('./render-jobs').muxVideoWithAudio
   previewAudioForBrowser?: typeof import('./audio-preview').previewAudioForBrowser
+  normalizeUploadedAudio?: typeof import('./uploads').normalizeUploadedAudio
+  optimizeUploadedCover?: typeof import('./uploads').optimizeUploadedCover
 }
 
 export function createApiConfig(config: Partial<ApiConfig> = {}): ApiConfig {
@@ -27,6 +29,12 @@ export function createApiConfig(config: Partial<ApiConfig> = {}): ApiConfig {
       : {}),
     ...(config.previewAudioForBrowser
       ? { previewAudioForBrowser: config.previewAudioForBrowser }
+      : {}),
+    ...(config.normalizeUploadedAudio
+      ? { normalizeUploadedAudio: config.normalizeUploadedAudio }
+      : {}),
+    ...(config.optimizeUploadedCover
+      ? { optimizeUploadedCover: config.optimizeUploadedCover }
       : {})
   }
 }

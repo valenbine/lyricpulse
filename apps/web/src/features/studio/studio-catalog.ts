@@ -146,6 +146,10 @@ export const templateCopy = {
     label: '纸堡垒',
     description: '纸面城墙、暖黄剪影和童话防线，适合故事歌、童声感作品和治愈民谣。'
   },
+  RosePostcard: {
+    label: '玫瑰明信片',
+    description: '暖粉情书纸面、玫瑰邮戳和轻心形漂浮，适合甜歌、告白和恋爱主题。'
+  },
   MirageGasStation: {
     label: '海市蜃楼加油站',
     description: '沙漠霓虹、热浪弧线和公路加油站，适合公路摇滚、复古电子和夏夜歌。'

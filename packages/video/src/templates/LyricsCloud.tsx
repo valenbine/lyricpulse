@@ -117,7 +117,7 @@ export function LyricsCloud({ config }: { config: LyricVideoConfig }) {
         >
           <div style={{ minWidth: 0 }}>
             <div style={{ fontSize: isWide ? 46 : 58, fontWeight: 950, letterSpacing: '-0.06em', lineHeight: 0.96 }}>
-              {config.title ?? 'LyricPulse'}
+              {config.title ?? ' '}
             </div>
             {config.artist ? (
               <div style={{ marginTop: 14, fontSize: isWide ? 23 : 30, fontWeight: 760, color: 'rgba(248,250,252,0.64)' }}>
@@ -138,7 +138,11 @@ export function LyricsCloud({ config }: { config: LyricVideoConfig }) {
               background: 'rgba(2,6,23,0.34)'
             }}
           >
-            RANDOM LYRICS
+            <span style={{ display: 'inline-flex', gap: 8 }}>
+              <span style={{ width: 8, height: 8, borderRadius: 999, background: config.theme.accentColor }} />
+              <span style={{ width: 8, height: 8, borderRadius: 999, background: config.theme.accentColor, opacity: 0.55 }} />
+              <span style={{ width: 8, height: 8, borderRadius: 999, background: config.theme.accentColor, opacity: 0.28 }} />
+            </span>
           </div>
         </div>
         <div style={{ position: 'absolute', left: box.left, top: box.top, width: box.width, height: box.height }}>

@@ -13,7 +13,12 @@ import { previewAudioForBrowser } from './audio-preview'
 import { ApiError, createErrorPayload } from './errors'
 import { createProjectStore } from './projects'
 import { createTemplateStore } from './templates'
-import { getAssetKind, saveUploadedAsset } from './uploads'
+import {
+  getAssetKind,
+  saveUploadedAsset,
+  normalizeUploadedAudio,
+  optimizeUploadedCover
+} from './uploads'
 import { analyzeProjectAudio } from './analysis'
 import {
   createRenderJob,
@@ -84,6 +89,10 @@ export function buildApp(config: Partial<ApiConfig> = {}) {
   const templateStore = createTemplateStore(apiConfig.storageRoot)
   const browserPreviewAudio =
     apiConfig.previewAudioForBrowser ?? previewAudioForBrowser
+  const uploadedAudioNormalizer =
+    apiConfig.normalizeUploadedAudio ?? normalizeUploadedAudio
+  const uploadedCoverOptimizer =
+    apiConfig.optimizeUploadedCover ?? optimizeUploadedCover
   const app = Fastify({ logger: false })
 
   app.register(multipart, {
@@ -327,7 +336,9 @@ export function buildApp(config: Partial<ApiConfig> = {}) {
       store,
       project,
       kind,
-      file
+      file,
+      normalizeUploadedAudio: uploadedAudioNormalizer,
+      optimizeUploadedCover: uploadedCoverOptimizer
     })
 
     reply.code(201).send({

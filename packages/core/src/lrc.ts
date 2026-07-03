@@ -3,6 +3,7 @@ import type { LrcParseIssue, LrcParseResult, LyricLine } from './types'
 const timestampPattern = /\[(\d{1,2}):(\d{2})(?:\.(\d{1,3}))?\]/g
 const anyBracketedTimestampPattern = /\[[^\]]*\d+:[^\]]*\]/
 const artistSeparatorPattern = /(?:feat\.?|ft\.?|with|and| x | × |\/|\\|,|，|、|&|\+)/gi
+const sectionLabelPattern = /^(?:(?:主歌|副歌|导歌|预副歌|桥段|间奏|前奏|尾奏|结尾|verse|chorus|pre\s*-?\s*chorus|bridge|intro|outro|interlude)\s*[一二三四五六七八九十\d]*)$/iu
 
 export function parseLrc(input: string): LrcParseResult {
   const issues: LrcParseIssue[] = []
@@ -27,7 +28,9 @@ export function parseLrc(input: string): LrcParseResult {
       return
     }
 
-    const lyricText = sourceLine.replace(timestampPattern, '').trim()
+    const lyricText = normalizeLyricText(
+      sourceLine.replace(timestampPattern, '').trim()
+    )
 
     matches.forEach((match, matchIndex) => {
       const startTime = timestampToSeconds(match)
@@ -72,6 +75,12 @@ export function parseLrc(input: string): LrcParseResult {
     lines: sortedLines,
     issues
   }
+}
+
+function normalizeLyricText(value: string) {
+  const normalized = value.replace(/[【\[（(]\s*|\s*[】\]）)]/g, '').trim()
+
+  return sectionLabelPattern.test(normalized) ? '' : value
 }
 
 export function filterLyricsByArtistName(

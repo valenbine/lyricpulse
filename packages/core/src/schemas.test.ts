@@ -25,6 +25,7 @@ const analysis = {
 const config = {
   projectId: 'project-1',
   ratio: '9:16',
+  renderQuality: 'standard',
   templateId: 'PulseCover',
   title: 'Song Title',
   artist: 'Artist',
@@ -99,6 +100,15 @@ describe('schemas', () => {
     })
 
     expect(parsed.effect.stageLighting).toBe(0.75)
+  })
+
+  it('fills default render quality for legacy configs', () => {
+    const parsed = lyricVideoConfigSchema.parse({
+      ...config,
+      renderQuality: undefined
+    })
+
+    expect(parsed.renderQuality).toBe('standard')
   })
 
   it('accepts extended render job lifecycle fields', () => {

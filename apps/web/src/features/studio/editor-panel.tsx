@@ -1,6 +1,12 @@
 import { SlidersHorizontal } from 'lucide-react'
 import { useState } from 'react'
-import { templateIds, videoRatios, type TemplateDefinition, type TemplateId, type VideoRatio } from '@lyricpulse/core'
+import {
+  templateIds,
+  videoRatios,
+  type TemplateDefinition,
+  type TemplateId,
+  type VideoRatio
+} from '@lyricpulse/core'
 import { Button } from '../../components/ui/button'
 import {
   Card,

@@ -93,7 +93,7 @@ export function CinemaBeam({ config }: { config: LyricVideoConfig }) {
                 textShadow: '0 4px 18px rgba(0,0,0,0.68)'
               }}
             >
-              {config.title ?? 'LyricPulse'}
+              {config.title ?? ' '}
             </div>
             {config.artist ? (
               <div
@@ -144,7 +144,7 @@ export function CinemaBeam({ config }: { config: LyricVideoConfig }) {
               textShadow: `0 0 ${interpolate(analysisFrame.treble, [0, 1], [16, 38])}px ${accent}66`
             }}
           >
-            {lyricLine?.text ?? 'LyricPulse'}
+            {lyricLine?.text ?? ' '}
           </div>
         </div>
       </div>

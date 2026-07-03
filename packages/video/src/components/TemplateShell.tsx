@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { AbsoluteFill, Audio, useCurrentFrame, useVideoConfig } from 'remotion'
 import type { LyricVideoConfig } from '@lyricpulse/core'
 import { getAnalysisFrame, getPlaybackTime } from '../helpers'
-import { isServerRender } from '../render-mode'
+import { isDraftRender, isServerRender } from '../render-mode'
 import { getBeatLighting, type TemplateShellVariant } from '../beat-lighting'
 
 export function TemplateShell({
@@ -22,6 +22,7 @@ export function TemplateShell({
   const accent = config.theme.accentColor
   const primary = config.theme.primaryColor
   const fastRender = isServerRender(config)
+  const draftRender = isDraftRender(config)
   const showFrame = variant !== 'dashboard'
   const lighting = getBeatLighting(config, analysisFrame, variant)
   const baseGradient =
@@ -46,30 +47,32 @@ export function TemplateShell({
       <div
         style={{
           position: 'absolute',
-          inset: fastRender ? '-16%' : '-24%',
-          opacity: lighting.ambientOpacity,
+          inset: draftRender ? '-10%' : fastRender ? '-16%' : '-24%',
+          opacity: draftRender ? lighting.ambientOpacity * 0.72 : lighting.ambientOpacity,
           transform: `scale(${lighting.ambientScale})`,
           background: `radial-gradient(circle at 50% 18%, ${accent}AA, transparent 34%), radial-gradient(circle at 18% 78%, ${primary}88, transparent 34%), radial-gradient(circle at 84% 28%, ${accent}77, transparent 30%), linear-gradient(180deg, ${accent}18 0%, transparent 34%, ${primary}14 68%, ${accent}10 100%)`,
-          filter: fastRender ? 'blur(34px)' : 'blur(82px)',
-          mixBlendMode: 'screen',
+          filter: draftRender ? 'blur(18px)' : fastRender ? 'blur(34px)' : 'blur(82px)',
+          mixBlendMode: draftRender ? 'normal' : 'screen',
           pointerEvents: 'none'
         }}
       />
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          opacity: lighting.beamOpacity,
-          transform: `scale(${lighting.beamScale})`,
-          transformOrigin: '50% 16%',
-          background: isWide
-            ? `linear-gradient(90deg, transparent 0%, ${accent}42 16%, transparent 34%, ${primary}30 50%, transparent 68%, ${accent}30 100%), radial-gradient(circle at 50% 0%, ${accent}88, transparent 42%)`
-            : `linear-gradient(180deg, ${accent}38 0%, transparent 28%, ${primary}24 52%, transparent 82%), radial-gradient(circle at 50% 0%, ${accent}88, transparent 42%)`,
-          filter: fastRender ? 'blur(24px)' : 'blur(48px)',
-          mixBlendMode: 'screen',
-          pointerEvents: 'none'
-        }}
-      />
+      {draftRender ? null : (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            opacity: lighting.beamOpacity,
+            transform: `scale(${lighting.beamScale})`,
+            transformOrigin: '50% 16%',
+            background: isWide
+              ? `linear-gradient(90deg, transparent 0%, ${accent}42 16%, transparent 34%, ${primary}30 50%, transparent 68%, ${accent}30 100%), radial-gradient(circle at 50% 0%, ${accent}88, transparent 42%)`
+              : `linear-gradient(180deg, ${accent}38 0%, transparent 28%, ${primary}24 52%, transparent 82%), radial-gradient(circle at 50% 0%, ${accent}88, transparent 42%)`,
+            filter: fastRender ? 'blur(24px)' : 'blur(48px)',
+            mixBlendMode: 'screen',
+            pointerEvents: 'none'
+          }}
+        />
+      )}
       {showFrame ? (
         <div
           style={{
@@ -77,16 +80,18 @@ export function TemplateShell({
             inset: isWide ? 56 : 28,
             border: `2px solid ${accent}40`,
             borderRadius: isWide ? 44 : 64,
-            boxShadow: fastRender
-              ? `0 0 0 1px rgba(255,255,255,0.08) inset, 0 0 ${Math.round(lighting.frameGlowBlur * 0.4)}px ${accent}22`
-              : `0 0 0 1px rgba(255,255,255,0.08) inset, 0 0 ${Math.round(lighting.frameGlowBlur)}px ${accent}${Math.round(lighting.frameGlowOpacity * 255)
-                  .toString(16)
-                  .padStart(2, '0')} inset, 0 0 ${Math.round(lighting.frameGlowBlur * 0.8)}px ${accent}22`,
+              boxShadow: draftRender
+                ? `0 0 0 1px rgba(255,255,255,0.05) inset`
+                : fastRender
+                ? `0 0 0 1px rgba(255,255,255,0.08) inset, 0 0 ${Math.round(lighting.frameGlowBlur * 0.4)}px ${accent}22`
+                : `0 0 0 1px rgba(255,255,255,0.08) inset, 0 0 ${Math.round(lighting.frameGlowBlur)}px ${accent}${Math.round(lighting.frameGlowOpacity * 255)
+                    .toString(16)
+                    .padStart(2, '0')} inset, 0 0 ${Math.round(lighting.frameGlowBlur * 0.8)}px ${accent}22`,
             pointerEvents: 'none'
           }}
         />
       ) : null}
-      {fastRender ? null : (
+      {fastRender || draftRender ? null : (
         <div
           style={{
             position: 'absolute',

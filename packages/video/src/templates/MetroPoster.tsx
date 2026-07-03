@@ -70,7 +70,7 @@ export function MetroPoster({ config }: { config: LyricVideoConfig }) {
               lineHeight: 0.92
             }}
           >
-            {config.title ?? 'LyricPulse'}
+            {config.title ?? ' '}
           </div>
           {config.artist ? (
             <div style={{ marginTop: 24, fontSize: isWide ? 32 : 42, fontWeight: 850 }}>

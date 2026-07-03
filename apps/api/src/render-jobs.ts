@@ -17,6 +17,7 @@ import {
   filterLyricsByArtistName,
   formatArtistDisplay,
   lyricVideoConfigSchema,
+  renderQualitySchema,
   renderJobSchema,
   templateIdSchema,
   videoRatioSchema,
@@ -257,6 +258,7 @@ async function buildRenderConfig(
   return lyricVideoConfigSchema.parse({
     projectId: project.id,
     ratio: parsedBody.ratio,
+    renderQuality: parsedBody.renderQuality,
     templateId: parsedBody.templateId,
     title: parsedBody.title ?? project.title,
     artist: formatArtistDisplay(effectiveArtist, effectiveArtistEnglish),
@@ -644,5 +646,6 @@ const renderRequestBodySchema = lyricVideoConfigSchema
   })
   .extend({
     ratio: videoRatioSchema.default('9:16'),
+    renderQuality: renderQualitySchema.default('standard'),
     templateId: templateIdSchema.default('NeonLyric')
   })

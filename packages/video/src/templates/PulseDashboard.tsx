@@ -194,7 +194,7 @@ export function PulseDashboard({ config }: { config: LyricVideoConfig }) {
                 color: 'rgba(226,232,240,0.72)'
               }}
             >
-              {config.artist ?? 'Unknown Artist'}
+              {config.artist ?? ' '}
             </div>
             <div
               style={{
@@ -207,7 +207,7 @@ export function PulseDashboard({ config }: { config: LyricVideoConfig }) {
                 color: '#F8FAFC'
               }}
             >
-              {config.title ?? 'Untitled Track'}
+              {config.title ?? ' '}
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import type { VideoRatio } from '@lyricpulse/core'
+import type { RenderQuality, VideoRatio } from '@lyricpulse/core'
 
 export type VideoDimensions = {
   width: number
@@ -13,7 +13,11 @@ export function getVideoDimensions(ratio: VideoRatio): VideoDimensions {
   return { width: 1080, height: 1920 }
 }
 
-export function getRenderDimensions(ratio: VideoRatio): VideoDimensions {
+export function getRenderDimensions(
+  ratio: VideoRatio,
+  quality: RenderQuality = 'standard'
+): VideoDimensions {
+  void quality
   return getVideoDimensions(ratio)
 }
 

@@ -59,7 +59,7 @@ export function PaperCutStage({ config }: { config: LyricVideoConfig }) {
             textAlign: isWide ? 'left' : 'center'
           }}
         >
-          {config.title ?? 'LyricPulse'}
+          {config.title ?? ' '}
         </div>
         <CaptionPanel
           config={config}

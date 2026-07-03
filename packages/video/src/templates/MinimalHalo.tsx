@@ -63,7 +63,7 @@ export function MinimalHalo({ config }: { config: LyricVideoConfig }) {
           }}
         >
           <div style={{ fontSize: isWide ? 74 : 86, fontWeight: 950, letterSpacing: '-0.07em', lineHeight: 0.96 }}>
-            {config.title ?? 'LyricPulse'}
+            {config.title ?? ' '}
           </div>
           {config.artist ? <div style={{ marginTop: 22, fontSize: isWide ? 32 : 40, fontWeight: 760 }}>{config.artist}</div> : null}
         </div>

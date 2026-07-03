@@ -15,8 +15,20 @@ export function TypewriterNoir({ config }: { config: LyricVideoConfig }) {
   const analysisFrame = getAnalysisFrame(config.analysis.frames, time)
   const lyricLine = getCurrentLyricLine(config.lyrics, time)
   const isWide = config.ratio === '16:9'
-  const coverSize = isWide ? 350 : 430
+  const frameInset = isWide ? '82px 100px' : '96px 86px'
+  const coverSize = isWide ? 320 : 340
+  const coverTop = isWide ? 300 : 230
+  const contentLeft = isWide ? 620 : 122
+  const contentRight = isWide ? 130 : 122
+  const contentTop = isWide ? 185 : 660
   const cursorVisible = Math.floor(frame / 12) % 2 === 0
+  const clampedTextStyle = {
+    display: '-webkit-box',
+    WebkitBoxOrient: 'vertical' as const,
+    overflow: 'hidden',
+    overflowWrap: 'break-word' as const,
+    wordBreak: 'break-word' as const
+  }
 
   return (
     <TemplateShell config={config} variant="dashboard">
@@ -24,7 +36,7 @@ export function TypewriterNoir({ config }: { config: LyricVideoConfig }) {
         <div
           style={{
             position: 'absolute',
-            inset: isWide ? '82px 100px' : '82px 62px',
+            inset: frameInset,
             borderRadius: 18,
             background: 'linear-gradient(135deg, #F8FAFC, #CBD5E1)',
             boxShadow: '0 38px 120px rgba(0,0,0,0.5)'
@@ -42,7 +54,7 @@ export function TypewriterNoir({ config }: { config: LyricVideoConfig }) {
         <FloatingCover
           config={config}
           left={isWide ? 150 : (1080 - coverSize) / 2}
-          top={isWide ? 300 : 250}
+          top={coverTop}
           size={coverSize}
           radius={8}
           rotate={isWide ? -2 : 0}
@@ -51,33 +63,35 @@ export function TypewriterNoir({ config }: { config: LyricVideoConfig }) {
         <div
           style={{
             position: 'absolute',
-            left: isWide ? 650 : 92,
-            right: isWide ? 130 : 92,
-            top: isWide ? 185 : 780,
+            left: contentLeft,
+            right: contentRight,
+            top: contentTop,
             color: '#020617',
             fontFamily: 'Georgia, serif'
           }}
         >
-          <div style={{ fontSize: isWide ? 30 : 36, fontWeight: 800, letterSpacing: '0.18em' }}>
-            CASE FILE / {config.artist ?? 'UNKNOWN'}
+          <div style={{ fontSize: isWide ? 28 : 30, fontWeight: 800, letterSpacing: '0.18em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {config.artist ?? ''}
           </div>
-          <div style={{ marginTop: 24, fontSize: isWide ? 88 : 100, fontWeight: 950, letterSpacing: '-0.06em', lineHeight: 0.92 }}>
-            {config.title ?? 'LyricPulse'}
+          <div style={{ marginTop: isWide ? 20 : 18, fontSize: isWide ? 74 : 76, fontWeight: 950, letterSpacing: '-0.06em', lineHeight: 0.94, WebkitLineClamp: 2, ...clampedTextStyle }}>
+            {config.title ?? ' '}
           </div>
           <div
             style={{
-              marginTop: isWide ? 58 : 70,
-              padding: isWide ? '34px 38px' : '42px 38px',
+              marginTop: isWide ? 48 : 42,
+              padding: isWide ? '30px 34px' : '30px 28px',
               borderTop: '5px solid #020617',
               borderBottom: '1px solid #020617',
-              fontSize: isWide ? 70 : 84,
+              fontSize: isWide ? 56 : 58,
               fontWeight: 900,
               lineHeight: 1.05,
               letterSpacing: '-0.045em'
             }}
           >
-            {lyricLine?.text ?? 'LyricPulse'}
-            <span style={{ opacity: cursorVisible ? 1 : 0 }}>_</span>
+            <div style={{ WebkitLineClamp: isWide ? 2 : 3, ...clampedTextStyle }}>
+              {lyricLine?.text ?? ' '}
+              <span style={{ opacity: cursorVisible ? 1 : 0 }}>_</span>
+            </div>
           </div>
         </div>
       </div>

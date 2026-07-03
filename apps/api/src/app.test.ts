@@ -9,6 +9,10 @@ import type {
   MuxVideoWithAudioFunction,
   RenderLyricVideoFunction
 } from './render-jobs'
+import type {
+  NormalizeUploadedAudioFunction,
+  OptimizeUploadedCoverFunction
+} from './uploads'
 import { buildApp } from './app'
 
 describe('LyricPulse API', () => {
@@ -49,13 +53,40 @@ describe('LyricPulse API', () => {
       await mkdir(dirname(input.outputPath), { recursive: true })
       await writeFile(input.outputPath, `preview:${input.inputPath}`)
     }
+    const normalizeUploadedAudio: NormalizeUploadedAudioFunction = async (
+      input
+    ) => ({
+      filename: input.filename.replace(/\.[^.]+$/, '.m4a'),
+      format: 'm4a',
+      mimeType: 'audio/mp4',
+      buffer: Buffer.from(`normalized:${input.buffer.toString()}`)
+    })
+    const optimizeUploadedCover: OptimizeUploadedCoverFunction = async (input) => {
+      if (input.filename.startsWith('large-cover')) {
+        return {
+          filename: 'large-cover.jpg',
+          format: 'jpg',
+          mimeType: 'image/jpeg',
+          buffer: Buffer.from('compressed cover bytes')
+        }
+      }
+
+      return {
+        filename: input.filename,
+        format: input.filename.endsWith('.png') ? 'png' : 'jpg',
+        mimeType: input.mimeType ?? 'image/png',
+        buffer: input.buffer
+      }
+    }
 
     app = buildApp({
       storageRoot,
       analyzeAudio,
       renderLyricVideo,
       muxVideoWithAudio,
-      previewAudioForBrowser
+      previewAudioForBrowser,
+      normalizeUploadedAudio,
+      optimizeUploadedCover
     })
     await app.ready()
   })
@@ -352,6 +383,109 @@ describe('LyricPulse API', () => {
     expect(assetResponse.body).toContain('First line')
   })
 
+  it('normalizes non UTF-8 LRC uploads before storage and parsing', async () => {
+    const project = await createProject()
+    const encodedLyrics = Buffer.from(
+      new Uint8Array([
+        0x5b, 0x30, 0x30, 0x3a, 0x30, 0x31, 0x2e, 0x30, 0x30, 0x5d,
+        0xd6, 0xd0, 0xce, 0xc4, 0xb8, 0xe8, 0xb4, 0xca, 0x0a, 0x5b,
+        0x30, 0x30, 0x3a, 0x30, 0x33, 0x2e, 0x35, 0x30, 0x5d, 0xcf,
+        0xc2, 0xd2, 0xbb, 0xbe, 0xe4
+      ])
+    )
+    const body = createMultipartBody({
+      kind: 'lyrics',
+      filename: 'song.lrc',
+      content: encodedLyrics
+    })
+
+    const uploadResponse = await app.inject({
+      method: 'POST',
+      url: `/api/projects/${project.id}/assets`,
+      headers: body.headers,
+      payload: body.payload
+    })
+
+    expect(uploadResponse.statusCode).toBe(201)
+    const result = uploadResponse.json()
+
+    expect(result.asset).toMatchObject({
+      kind: 'lyrics',
+      filename: 'song.lrc',
+      format: 'lrc',
+      mimeType: 'text/plain; charset=utf-8'
+    })
+    expect(result.project.lyrics).toEqual([
+      {
+        id: 'lrc-1-1',
+        startTime: 1,
+        endTime: 3.5,
+        text: '中文歌词'
+      },
+      {
+        id: 'lrc-2-1',
+        startTime: 3.5,
+        text: '下一句'
+      }
+    ])
+
+    const assetResponse = await app.inject({
+      method: 'GET',
+      url: `/api/projects/${project.id}/assets/${result.asset.id}`
+    })
+
+    expect(assetResponse.statusCode).toBe(200)
+    expect(assetResponse.body).toContain('中文歌词')
+    expect(assetResponse.body).toContain('下一句')
+  })
+
+  it('normalizes UTF-16 LRC uploads before storage and parsing', async () => {
+    const project = await createProject()
+    const encodedLyrics = Buffer.concat([
+      Buffer.from([0xff, 0xfe]),
+      Buffer.from('[00:01.00]中文歌词\n[00:03.50]下一句', 'utf16le')
+    ])
+    const body = createMultipartBody({
+      kind: 'lyrics',
+      filename: 'song.lrc',
+      content: encodedLyrics
+    })
+
+    const uploadResponse = await app.inject({
+      method: 'POST',
+      url: `/api/projects/${project.id}/assets`,
+      headers: body.headers,
+      payload: body.payload
+    })
+
+    expect(uploadResponse.statusCode).toBe(201)
+    const result = uploadResponse.json()
+
+    expect(result.asset.mimeType).toBe('text/plain; charset=utf-8')
+    expect(result.project.lyrics).toEqual([
+      {
+        id: 'lrc-1-1',
+        startTime: 1,
+        endTime: 3.5,
+        text: '中文歌词'
+      },
+      {
+        id: 'lrc-2-1',
+        startTime: 3.5,
+        text: '下一句'
+      }
+    ])
+
+    const assetResponse = await app.inject({
+      method: 'GET',
+      url: `/api/projects/${project.id}/assets/${result.asset.id}`
+    })
+
+    expect(assetResponse.statusCode).toBe(200)
+    expect(assetResponse.body).toContain('中文歌词')
+    expect(assetResponse.body).toContain('下一句')
+  })
+
   it('serves browser preview audio for non-stream-friendly history assets', async () => {
     const project = await createProject()
     const uploadedAudioResponse = await uploadAsset({
@@ -368,8 +502,8 @@ describe('LyricPulse API', () => {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(response.headers['content-type']).toContain('audio/mpeg')
-    expect(response.body).toContain('preview:')
+    expect(response.headers['content-type']).toContain('audio/mp4')
+    expect(response.body).toContain('normalized:fake flac bytes')
   })
 
   it('supports range requests for preview audio', async () => {
@@ -393,7 +527,42 @@ describe('LyricPulse API', () => {
     expect(response.statusCode).toBe(206)
     expect(response.headers['accept-ranges']).toBe('bytes')
     expect(response.headers['content-range']).toMatch(/^bytes 0-6\//)
-    expect(response.body).toBe('preview')
+    expect(response.body).toBe('normali')
+  })
+
+  it('normalizes uploaded audio assets to m4a', async () => {
+    const project = await createProject()
+    const response = await uploadAsset({
+      projectId: project.id,
+      kind: 'audio',
+      filename: 'song.flac',
+      content: 'fake flac bytes'
+    })
+
+    expect(response.statusCode).toBe(201)
+    expect(response.json().asset).toMatchObject({
+      filename: 'song.m4a',
+      format: 'm4a',
+      mimeType: 'audio/mp4'
+    })
+  })
+
+  it('compresses oversized cover uploads before storage', async () => {
+    const project = await createProject()
+    const response = await uploadAsset({
+      projectId: project.id,
+      kind: 'cover',
+      filename: 'large-cover.png',
+      content: 'placeholder cover bytes'
+    })
+
+    expect(response.statusCode).toBe(201)
+    expect(response.json().asset).toMatchObject({
+      filename: 'large-cover.jpg',
+      format: 'jpg',
+      mimeType: 'image/jpeg',
+      sizeBytes: 'compressed cover bytes'.length
+    })
   })
 
   it('deletes projects together with uploaded assets and generated artifacts', async () => {
@@ -432,6 +601,7 @@ describe('LyricPulse API', () => {
       url: `/api/projects/${project.id}/render`,
       payload: {
         ratio: '9:16',
+        renderQuality: 'standard',
         templateId: 'NeonLyric',
         theme: {
           primaryColor: '#8B5CF6',
@@ -477,7 +647,7 @@ describe('LyricPulse API', () => {
     expect(listResponse.json().projects).toEqual([])
 
     await expect(
-      stat(join(storageRoot, 'uploads', project.id, 'audio', `${uploadedAudio.id}.flac`))
+      stat(join(storageRoot, 'uploads', project.id, 'audio', `${uploadedAudio.id}.m4a`))
     ).rejects.toMatchObject({ code: 'ENOENT' })
     await expect(
       stat(join(storageRoot, 'preview-audio', project.id, `${uploadedAudio.id}.mp3`))
@@ -610,6 +780,7 @@ describe('LyricPulse API', () => {
       heartbeatAt: expect.any(String),
       config: {
         ratio: '9:16',
+        renderQuality: 'standard',
         templateId: 'NeonLyric'
       }
     })
@@ -688,6 +859,7 @@ describe('LyricPulse API', () => {
       url: `/api/projects/${project.id}/render`,
       payload: {
         ratio: '9:16',
+        renderQuality: 'standard',
         templateId: 'NeonLyric',
         artist: '周杰伦',
         artistEnglish: 'JAY CHOU',
@@ -731,6 +903,7 @@ describe('LyricPulse API', () => {
       url: `/api/projects/${project.id}/render`,
       payload: {
         ratio: '9:16',
+        renderQuality: 'standard',
         templateId: 'OrbitWords',
         theme: {
           primaryColor: '#8B5CF6',
@@ -763,6 +936,35 @@ describe('LyricPulse API', () => {
       code: 'RENDER_JOB_IN_PROGRESS',
       message: 'A render job is already in progress for this project'
     })
+  })
+
+  it('persists draft render quality in render jobs', async () => {
+    const project = await createRenderableProject()
+
+    const response = await app.inject({
+      method: 'POST',
+      url: `/api/projects/${project.id}/render`,
+      payload: {
+        ratio: '9:16',
+        renderQuality: 'draft',
+        templateId: 'NeonLyric',
+        theme: {
+          primaryColor: '#8B5CF6',
+          accentColor: '#22C55E',
+          backgroundIntensity: 0.85,
+          fontFamily: 'Poppins, sans-serif'
+        },
+        effect: {
+          lyricGlow: 0.8,
+          pulseIntensity: 0.75,
+          beatImpact: 0.7,
+          stageLighting: 0.75
+        }
+      }
+    })
+
+    expect(response.statusCode).toBe(201)
+    expect(response.json().job.config.renderQuality).toBe('draft')
   })
 
   it('serves production web assets from a configured dist folder', async () => {
@@ -915,6 +1117,7 @@ describe('LyricPulse API', () => {
       url: `/api/projects/${projectId}/render`,
       payload: {
         ratio: '9:16',
+        renderQuality: 'standard',
         templateId: 'NeonLyric',
         theme: {
           primaryColor: '#8B5CF6',
@@ -970,23 +1173,29 @@ describe('LyricPulse API', () => {
 function createMultipartBody(input: {
   kind: string
   filename: string
-  content: string
+  content: string | Buffer
 }) {
   const boundary = `----lyricpulse-${Date.now()}`
-  const payload = Buffer.from(
+  const fileContent = Buffer.isBuffer(input.content)
+    ? input.content
+    : Buffer.from(input.content)
+  const payload = Buffer.concat(
     [
-      `--${boundary}`,
-      'Content-Disposition: form-data; name="kind"',
-      '',
-      input.kind,
-      `--${boundary}`,
-      `Content-Disposition: form-data; name="file"; filename="${input.filename}"`,
-      'Content-Type: application/octet-stream',
-      '',
-      input.content,
-      `--${boundary}--`,
-      ''
-    ].join('\r\n')
+      Buffer.from(
+        [
+          `--${boundary}`,
+          'Content-Disposition: form-data; name="kind"',
+          '',
+          input.kind,
+          `--${boundary}`,
+          `Content-Disposition: form-data; name="file"; filename="${input.filename}"`,
+          'Content-Type: application/octet-stream',
+          ''
+        ].join('\r\n') + '\r\n'
+      ),
+      fileContent,
+      Buffer.from(`\r\n--${boundary}--\r\n`)
+    ]
   )
 
   return {

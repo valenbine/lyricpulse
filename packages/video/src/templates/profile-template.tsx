@@ -45,6 +45,7 @@ type ProfileStyle =
   | 'baroque'
   | 'swiss'
   | 'candy'
+  | 'rosePostcard'
   | 'furnace'
   | 'jellyfish'
   | 'radio'
@@ -130,6 +131,12 @@ type Profile = {
   coverRadius: number
   coverRotate?: number
   circleCover?: boolean
+  coverScale?: number
+  titleScale?: number
+  artistScale?: number
+  lyricScale?: number
+  contentInset?: number
+  lyricTopOffset?: number
 }
 
 export function ProfileTemplate({
@@ -145,13 +152,18 @@ export function ProfileTemplate({
   const analysisFrame = getAnalysisFrame(config.analysis.frames, time)
   const lyricLine = getCurrentLyricLine(config.lyrics, time)
   const isWide = config.ratio === '16:9'
-  const coverSize = isWide ? 370 : 480
+  const coverScale = profile.coverScale ?? 1
+  const titleScale = profile.titleScale ?? 1
+  const artistScale = profile.artistScale ?? 1
+  const lyricScale = profile.lyricScale ?? 1
+  const contentInset = profile.contentInset ?? (isWide ? 0 : 0)
+  const coverSize = (isWide ? 370 : 480) * coverScale
   const coverLeft = isWide ? 155 : (1080 - coverSize) / 2
   const coverTop = isWide ? 300 : 230
-  const contentLeft = isWide ? 650 : 54
-  const contentRight = isWide ? 110 : 54
+  const contentLeft = (isWide ? 650 : 54) + contentInset
+  const contentRight = (isWide ? 110 : 54) + contentInset
   const titleTop = isWide ? 175 : 770
-  const lyricTop = isWide ? 500 : 1190
+  const lyricTop = (isWide ? 500 : 1190) + (profile.lyricTopOffset ?? 0)
   const captionFrame = getProfileCaptionFrame(profile.style)
   const contrast = getContrastTextColors(config, `${config.templateId}:${profile.style}`)
 
@@ -191,30 +203,30 @@ export function ProfileTemplate({
             right: contentRight,
             top: titleTop,
             color: contrast.titleColor,
-            fontSize: isWide ? 84 : 82,
+            fontSize: (isWide ? 84 : 82) * titleScale,
             fontWeight: 950,
             letterSpacing: profile.style === 'game' ? '-0.03em' : '-0.075em',
             lineHeight: 0.92,
             textShadow: contrast.titleShadow
           }}
         >
-          {config.title ?? 'LyricPulse'}
+          {config.title ?? ' '}
         </div>
         <div
           style={{
             position: 'absolute',
             left: contentLeft,
             right: contentRight,
-            top: titleTop + (isWide ? 108 : 112),
+            top: titleTop + (isWide ? 108 : 112) * titleScale,
             color: contrast.lyricColor,
-            fontSize: isWide ? 28 : 30,
+            fontSize: (isWide ? 28 : 30) * artistScale,
             fontWeight: 850,
             letterSpacing: '0.16em',
             textTransform: 'uppercase',
             opacity: 0.82
           }}
         >
-          {config.artist ?? 'LyricPulse'}
+          {config.artist ?? ' '}
         </div>
         <CaptionPanel
           config={config}
@@ -223,7 +235,7 @@ export function ProfileTemplate({
           right={contentRight}
           top={lyricTop}
           align={isWide ? 'left' : 'center'}
-          fontSize={isWide ? 70 : 72}
+          fontSize={(isWide ? 70 : 72) * lyricScale}
           frame={captionFrame}
         />
       </div>
@@ -270,6 +282,10 @@ function getProfileCaptionFrame(style: ProfileStyle): CaptionFrame {
 
   if (style === 'calendar' || style === 'film' || style === 'thermal' || style === 'flipboard' || style === 'platformBroadcast' || style === 'silverHalide' || style === 'tapeOverwrite' || style === 'risographPress' || style === 'auroraLedger' || style === 'motelPostcard') {
     return 'calendar'
+  }
+
+  if (style === 'rosePostcard') {
+    return 'paper'
   }
 
   if (style === 'baroque' || style === 'tarot' || style === 'puppet' || style === 'templeShadowFair' || style === 'paperFortress') {
@@ -533,6 +549,10 @@ function ProfileDecorations({
 
   if (profile.style === 'embroidery') {
     return <EmbroideryHoop accent="#DB2777" frame={frame} />
+  }
+
+  if (profile.style === 'rosePostcard') {
+    return <RosePostcardDecor accent="#F43F5E" frame={frame} bass={bass} />
   }
 
   if (profile.style === 'calendar') {
@@ -889,11 +909,11 @@ function LavaBlobs({ accent, frame, bass }: { accent: string; frame: number; bas
 }
 
 function TarotGlyphs({ accent, frame }: { accent: string; frame: number }) {
-  return <>{['SUN', 'MOON', 'STAR', 'DIAM', 'SIGN'].map((glyph, index) => <div key={glyph} style={{ position: 'absolute', left: `${12 + index * 17}%`, top: `${12 + (index % 3) * 24}%`, color: accent, fontSize: 58 + index * 10, fontWeight: 950, opacity: 0.26, transform: `rotate(${frame * 0.05 + index * 18}deg)` }}>{glyph}</div>)}</>
+  return <>{Array.from({ length: 5 }).map((_, index) => <div key={index} style={{ position: 'absolute', left: `${12 + index * 17}%`, top: `${12 + (index % 3) * 24}%`, width: 70 + index * 8, height: 70 + index * 8, border: `6px double ${accent}`, borderRadius: index % 2 ? '50%' : 10, opacity: 0.26, transform: `rotate(${frame * 0.05 + index * 18}deg)` }} />)}</>
 }
 
 function GraffitiTags({ accent, frame }: { accent: string; frame: number }) {
-  return <>{['DROP', 'BEAT', 'FLOW', 'LRC'].map((word, index) => <div key={word} style={{ position: 'absolute', left: `${6 + index * 23}%`, top: `${12 + (index % 2) * 42}%`, color: index % 2 ? '#F8FAFC' : accent, fontSize: 120, fontWeight: 950, letterSpacing: '-0.12em', transform: `rotate(${-12 + index * 9 + Math.sin(frame / 24) * 2}deg)`, opacity: 0.24 }}>{word}</div>)}</>
+  return <>{Array.from({ length: 4 }).map((_, index) => <div key={index} style={{ position: 'absolute', left: `${6 + index * 23}%`, top: `${12 + (index % 2) * 42}%`, width: 210, height: 78, borderRadius: 999, border: `14px solid ${index % 2 ? '#F8FAFC' : accent}`, transform: `rotate(${-12 + index * 9 + Math.sin(frame / 24) * 2}deg)`, opacity: 0.24 }} />)}</>
 }
 
 function ZenRakes({ accent, frame }: { accent: string; frame: number }) {
@@ -941,7 +961,7 @@ function CloudBands({ accent, frame }: { accent: string; frame: number }) {
 }
 
 function SealMarks({ accent, frame }: { accent: string; frame: number }) {
-  return <>{Array.from({ length: 9 }).map((_, index) => <div key={index} style={{ position: 'absolute', right: `${6 + (index % 3) * 18}%`, top: `${10 + Math.floor(index / 3) * 24}%`, width: 120, height: 120, border: `12px solid ${accent}`, color: accent, fontSize: 26, fontWeight: 950, display: 'grid', placeItems: 'center', opacity: 0.2, transform: `rotate(${index * 13 + Math.sin(frame / 50) * 4}deg)` }}>SEAL</div>)}</>
+  return <>{Array.from({ length: 9 }).map((_, index) => <div key={index} style={{ position: 'absolute', right: `${6 + (index % 3) * 18}%`, top: `${10 + Math.floor(index / 3) * 24}%`, width: 120, height: 120, border: `12px double ${accent}`, borderRadius: '50%', opacity: 0.2, transform: `rotate(${index * 13 + Math.sin(frame / 50) * 4}deg)` }} />)}</>
 }
 
 function SpecimenSlides({ accent, frame, treble }: { accent: string; frame: number; treble: number }) {
@@ -949,11 +969,11 @@ function SpecimenSlides({ accent, frame, treble }: { accent: string; frame: numb
 }
 
 function BoardingPassLines({ accent, frame }: { accent: string; frame: number }) {
-  return <><div style={{ position: 'absolute', inset: '90px 70px', borderRadius: 38, background: '#F8FAFC', boxShadow: '0 36px 120px rgba(15,23,42,0.28)' }} /><div style={{ position: 'absolute', left: '11%', right: '11%', top: '17%', height: 8, backgroundImage: `repeating-linear-gradient(90deg, ${accent} 0 24px, transparent 24px 40px)` }} />{['GATE', 'SEAT', 'ZONE', 'LRC'].map((word, index) => <div key={word} style={{ position: 'absolute', left: `${12 + index * 19}%`, top: `${26 + (index % 2) * 12}%`, color: accent, fontSize: 42, fontWeight: 950, opacity: 0.16, transform: `translateY(${Math.sin(frame / 36 + index) * 6}px)` }}>{word}</div>)}</>
+  return <><div style={{ position: 'absolute', inset: '90px 70px', borderRadius: 38, background: '#F8FAFC', boxShadow: '0 36px 120px rgba(15,23,42,0.28)' }} /><div style={{ position: 'absolute', left: '11%', right: '11%', top: '17%', height: 8, backgroundImage: `repeating-linear-gradient(90deg, ${accent} 0 24px, transparent 24px 40px)` }} />{Array.from({ length: 4 }).map((_, index) => <div key={index} style={{ position: 'absolute', left: `${12 + index * 19}%`, top: `${26 + (index % 2) * 12}%`, width: 150, height: 18, background: accent, opacity: 0.16, transform: `translateY(${Math.sin(frame / 36 + index) * 6}px)` }} />)}</>
 }
 
 function DossierStamps({ accent, frame }: { accent: string; frame: number }) {
-  return <><div style={{ position: 'absolute', inset: 70, backgroundImage: 'repeating-linear-gradient(0deg, rgba(69,26,3,0.18) 0px, rgba(69,26,3,0.18) 2px, transparent 2px, transparent 42px)', border: '2px solid rgba(69,26,3,0.28)' }} />{['FILE', 'EVIDENCE', 'CASE', 'AUDIO'].map((word, index) => <div key={word} style={{ position: 'absolute', left: `${10 + index * 19}%`, top: `${16 + (index % 3) * 22}%`, padding: '16px 28px', border: `9px solid ${accent}`, color: accent, fontSize: 42, fontWeight: 950, opacity: 0.2, transform: `rotate(${-18 + index * 13 + Math.sin(frame / 48) * 2}deg)` }}>{word}</div>)}</>
+  return <><div style={{ position: 'absolute', inset: 70, backgroundImage: 'repeating-linear-gradient(0deg, rgba(69,26,3,0.18) 0px, rgba(69,26,3,0.18) 2px, transparent 2px, transparent 42px)', border: '2px solid rgba(69,26,3,0.28)' }} />{Array.from({ length: 4 }).map((_, index) => <div key={index} style={{ position: 'absolute', left: `${10 + index * 19}%`, top: `${16 + (index % 3) * 22}%`, width: 170, height: 92, border: `9px solid ${accent}`, opacity: 0.2, transform: `rotate(${-18 + index * 13 + Math.sin(frame / 48) * 2}deg)` }} />)}</>
 }
 
 function WeatherRadar({ accent, frame, bass }: { accent: string; frame: number; bass: number }) {
@@ -1021,15 +1041,15 @@ function TopographicSandbox({ accent, frame }: { accent: string; frame: number }
 }
 
 function AstralCompassRose({ accent, frame }: { accent: string; frame: number }) {
-  return <><div style={{ position: 'absolute', left: '50%', top: '38%', width: 780, height: 780, transform: `translate(-50%, -50%) rotate(${frame * 0.05}deg)`, background: `conic-gradient(from 0deg, ${accent}66 0 8deg, transparent 8deg 22deg, ${accent}33 22deg 30deg, transparent 30deg 45deg)`, borderRadius: '50%' }} />{['N', 'E', 'S', 'W'].map((letter, index) => <div key={letter} style={{ position: 'absolute', left: `${50 + Math.cos((index * Math.PI) / 2) * 32}%`, top: `${38 + Math.sin((index * Math.PI) / 2) * 24}%`, color: accent, fontSize: 54, fontWeight: 950 }}>{letter}</div>)}</>
+  return <><div style={{ position: 'absolute', left: '50%', top: '38%', width: 780, height: 780, transform: `translate(-50%, -50%) rotate(${frame * 0.05}deg)`, background: `conic-gradient(from 0deg, ${accent}66 0 8deg, transparent 8deg 22deg, ${accent}33 22deg 30deg, transparent 30deg 45deg)`, borderRadius: '50%' }} />{[0, 1, 2, 3].map((index) => <div key={index} style={{ position: 'absolute', left: `${50 + Math.cos((index * Math.PI) / 2) * 32}%`, top: `${38 + Math.sin((index * Math.PI) / 2) * 24}%`, width: 34, height: 34, borderRadius: '50%', background: accent }} />)}</>
 }
 
 function DepartureFlipboardRows({ accent, frame }: { accent: string; frame: number }) {
-  return <>{Array.from({ length: 9 }).map((_, index) => <div key={index} style={{ position: 'absolute', left: '8%', right: '8%', top: `${10 + index * 8}%`, height: 54, borderRadius: 8, background: '#111827', border: '1px solid rgba(248,250,252,0.16)', boxShadow: '0 8px 0 rgba(0,0,0,0.22)', transform: `translateX(${Math.sin(frame / 34 + index) * 5}px)` }}><div style={{ position: 'absolute', left: 28, top: 11, color: accent, fontSize: 24, fontWeight: 900, letterSpacing: '0.24em', opacity: 0.22 }}>{String.fromCharCode(65 + ((index + Math.floor(frame / 18)) % 26)).repeat(8)}</div></div>)}</>
+  return <>{Array.from({ length: 9 }).map((_, index) => <div key={index} style={{ position: 'absolute', left: '8%', right: '8%', top: `${10 + index * 8}%`, height: 54, borderRadius: 8, background: '#111827', border: '1px solid rgba(248,250,252,0.16)', boxShadow: '0 8px 0 rgba(0,0,0,0.22)', transform: `translateX(${Math.sin(frame / 34 + index) * 5}px)` }}><div style={{ position: 'absolute', left: 28, right: 28, top: 18, height: 8, backgroundImage: `repeating-linear-gradient(90deg, ${accent} 0 18px, transparent 18px 32px)`, opacity: 0.22 }} /></div>)}</>
 }
 
 function PlatformBroadcastBoard({ accent, frame, bass }: { accent: string; frame: number; bass: number }) {
-  return <><div style={{ position: 'absolute', inset: '72px 64px', borderRadius: 28, background: 'rgba(3,7,18,0.86)', border: '1px solid rgba(148,163,184,0.26)', boxShadow: '0 30px 90px rgba(0,0,0,0.42)' }} />{Array.from({ length: 10 }).map((_, index) => <div key={index} style={{ position: 'absolute', left: '10%', right: '10%', top: `${12 + index * 7.2}%`, height: 48, borderRadius: 6, background: index === Math.floor(frame / 18) % 10 ? 'rgba(245,158,11,0.16)' : 'rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(148,163,184,0.18)' }}><div style={{ position: 'absolute', left: 22, top: 10, color: accent, fontSize: 21, fontWeight: 900, letterSpacing: '0.24em', opacity: 0.2 + (index % 3) * 0.08 }}>{`${String(index).padStart(2, '0')} PLATFORM`}</div><div style={{ position: 'absolute', right: 22, top: 10, color: '#FCD34D', fontSize: 22, fontWeight: 900, opacity: 0.38 + bass * 0.18 }}>{`${(frame + index * 7) % 24}`.padStart(2, '0')}:{`${(index * 7) % 60}`.padStart(2, '0')}</div></div>)}<div style={{ position: 'absolute', left: '10%', right: '10%', top: '10.5%', height: 10, backgroundImage: `repeating-linear-gradient(90deg, ${accent} 0 18px, transparent 18px 36px)`, opacity: 0.26 }} /></>
+  return <><div style={{ position: 'absolute', inset: '72px 64px', borderRadius: 28, background: 'rgba(3,7,18,0.86)', border: '1px solid rgba(148,163,184,0.26)', boxShadow: '0 30px 90px rgba(0,0,0,0.42)' }} />{Array.from({ length: 10 }).map((_, index) => <div key={index} style={{ position: 'absolute', left: '10%', right: '10%', top: `${12 + index * 7.2}%`, height: 48, borderRadius: 6, background: index === Math.floor(frame / 18) % 10 ? 'rgba(245,158,11,0.16)' : 'rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(148,163,184,0.18)' }}><div style={{ position: 'absolute', left: 22, top: 19, width: 240, height: 8, background: accent, opacity: 0.2 + (index % 3) * 0.08 }} /><div style={{ position: 'absolute', right: 22, top: 16, width: 86, height: 14, background: '#FCD34D', opacity: 0.38 + bass * 0.18 }} /></div>)}<div style={{ position: 'absolute', left: '10%', right: '10%', top: '10.5%', height: 10, backgroundImage: `repeating-linear-gradient(90deg, ${accent} 0 18px, transparent 18px 36px)`, opacity: 0.26 }} /></>
 }
 
 function SilverHalidePrint({ accent, frame, treble }: { accent: string; frame: number; treble: number }) {
@@ -1125,7 +1145,7 @@ function VelvetRopeLoops({ accent, frame }: { accent: string; frame: number }) {
 }
 
 function DataRainWall({ accent, frame, bass }: { accent: string; frame: number; bass: number }) {
-  return <>{Array.from({ length: 34 }).map((_, index) => <div key={index} style={{ position: 'absolute', left: `${index * 3}%`, top: `${(index * 19 + frame * (0.7 + bass)) % 100}%`, color: accent, fontSize: 28 + (index % 3) * 12, fontWeight: 900, opacity: 0.16 + bass * 0.2, writingMode: 'vertical-rl' }}>{index % 2 ? '10110' : '01001'}</div>)}</>
+  return <>{Array.from({ length: 34 }).map((_, index) => <div key={index} style={{ position: 'absolute', left: `${index * 3}%`, top: `${(index * 19 + frame * (0.7 + bass)) % 100}%`, width: 5 + (index % 3) * 3, height: 90 + (index % 4) * 24, background: accent, opacity: 0.16 + bass * 0.2 }} />)}</>
 }
 
 function CeramicKilnHeat({ accent, frame, bass }: { accent: string; frame: number; bass: number }) {
@@ -1153,7 +1173,7 @@ function CircuitCathedralWindows({ accent, frame }: { accent: string; frame: num
 }
 
 function ForensicDarkroom({ accent, frame }: { accent: string; frame: number }) {
-  return <><div style={{ position: 'absolute', inset: 0, background: `radial-gradient(circle at 32% 28%, ${accent}55, transparent 26%), repeating-linear-gradient(90deg, rgba(248,250,252,0.08) 0 2px, transparent 2px 44px)` }} />{['CASE', 'TRACE', 'PRINT', 'LAB'].map((word, index) => <div key={word} style={{ position: 'absolute', left: `${10 + index * 20}%`, top: `${14 + (index % 2) * 34}%`, padding: '18px 32px', border: `8px solid ${accent}`, color: accent, fontSize: 48, fontWeight: 950, opacity: 0.18, transform: `rotate(${-16 + index * 11 + Math.sin(frame / 42) * 2}deg)` }}>{word}</div>)}</>
+  return <><div style={{ position: 'absolute', inset: 0, background: `radial-gradient(circle at 32% 28%, ${accent}55, transparent 26%), repeating-linear-gradient(90deg, rgba(248,250,252,0.08) 0 2px, transparent 2px 44px)` }} />{Array.from({ length: 4 }).map((_, index) => <div key={index} style={{ position: 'absolute', left: `${10 + index * 20}%`, top: `${14 + (index % 2) * 34}%`, width: 180, height: 92, border: `8px solid ${accent}`, opacity: 0.18, transform: `rotate(${-16 + index * 11 + Math.sin(frame / 42) * 2}deg)` }} />)}</>
 }
 
 function InsectCabinet({ accent, frame }: { accent: string; frame: number }) {
@@ -1190,6 +1210,10 @@ function CyanotypeHarbor({ accent, frame }: { accent: string; frame: number }) {
 
 function CandyWrapperShop({ accent, frame, treble }: { accent: string; frame: number; treble: number }) {
   return <>{['#F9A8D4', '#FDE68A', '#A7F3D0', accent].map((color, index) => <div key={color} style={{ position: 'absolute', left: `${5 + index * 24}%`, top: `${10 + (index % 2) * 36}%`, width: 330, height: 180, borderRadius: 28, background: `repeating-linear-gradient(45deg, ${color} 0 18px, rgba(255,255,255,0.55) 18px 34px)`, boxShadow: '14px 18px 0 rgba(15,23,42,0.12)', transform: `rotate(${-8 + index * 6 + Math.sin(frame / 36) * 2}deg)`, opacity: 0.74 + treble * 0.12 }} />)}</>
+}
+
+function RosePostcardDecor({ accent, frame, bass }: { accent: string; frame: number; bass: number }) {
+  return <><div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 18% 16%, rgba(255,255,255,0.85), transparent 18%), radial-gradient(circle at 82% 22%, rgba(251,113,133,0.22), transparent 18%), linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0))' }} /><div style={{ position: 'absolute', inset: 72, borderRadius: 36, border: '2px solid rgba(190,24,93,0.16)', backgroundImage: 'linear-gradient(rgba(255,255,255,0.55) 1px, transparent 1px), linear-gradient(90deg, rgba(251,113,133,0.08) 1px, transparent 1px)', backgroundSize: '100% 44px, 44px 100%', boxShadow: 'inset 0 0 80px rgba(255,255,255,0.22)' }} />{Array.from({ length: 7 }).map((_, index) => { const left = 8 + ((index * 13) % 78); const top = 10 + ((index * 17) % 66); const drift = Math.sin(frame / 28 + index) * 10; const scale = 0.8 + (index % 3) * 0.16 + bass * 0.08; return <div key={index} style={{ position: 'absolute', left: `${left}%`, top: `${top}%`, width: 78, height: 70, opacity: 0.18 + (index % 2) * 0.08, transform: `translate(${drift}px, ${Math.cos(frame / 34 + index) * 6}px) rotate(${-12 + index * 5}deg) scale(${scale})` }}><div style={{ position: 'absolute', left: 8, top: 0, width: 30, height: 48, borderRadius: '30px 30px 0 0', background: index % 2 ? accent : '#FB7185', transform: 'rotate(-45deg)', transformOrigin: '100% 100%' }} /><div style={{ position: 'absolute', left: 38, top: 0, width: 30, height: 48, borderRadius: '30px 30px 0 0', background: index % 2 ? accent : '#FB7185', transform: 'rotate(45deg)', transformOrigin: '0 100%' }} /></div> })}{Array.from({ length: 3 }).map((_, index) => <div key={`stamp-${index}`} style={{ position: 'absolute', right: 72 + index * 86, top: 96 + (index % 2) * 32, width: 56, height: 56, borderRadius: '50%', border: `3px dashed ${index === 1 ? accent : '#FB7185'}`, opacity: 0.35, transform: `rotate(${frame * 0.4 + index * 18}deg)` }} />)}</>
 }
 
 function LaserEngraver({ accent, frame, bass }: { accent: string; frame: number; bass: number }) {
@@ -1267,6 +1291,7 @@ export const neuralConstellationProfile: Profile = { style: 'neural', label: 'NE
 export const baroqueFrameProfile: Profile = { style: 'baroque', label: 'BAROQUE FRAME', variant: 'dashboard', background: 'linear-gradient(135deg, #1C1917, #450A0A)', titleColor: '#FEF3C7', coverRadius: 18 }
 export const swissGridProfile: Profile = { style: 'swiss', label: 'SWISS GRID', variant: 'pulse', background: '#F8FAFC', titleColor: '#020617', coverRadius: 0 }
 export const candyGlassProfile: Profile = { style: 'candy', label: 'CANDY GLASS', variant: 'neon', background: 'linear-gradient(135deg, #FDF2F8, #CFFAFE)', titleColor: '#701A75', coverRadius: 64, coverRotate: -3 }
+export const rosePostcardProfile: Profile = { style: 'rosePostcard', label: 'ROSE POSTCARD', variant: 'pulse', background: 'linear-gradient(180deg, #FFF1F2, #FDF2F8 48%, #FEF3C7)', titleColor: '#9D174D', coverRadius: 36, coverRotate: -4, coverScale: 0.82, titleScale: 0.84, artistScale: 0.92, lyricScale: 0.82, contentInset: 34, lyricTopOffset: 36 }
 export const industrialFurnaceProfile: Profile = { style: 'furnace', label: 'INDUSTRIAL FURNACE', variant: 'dashboard', background: 'linear-gradient(135deg, #111827, #431407)', titleColor: '#FFF7ED', coverRadius: 8 }
 export const jellyfishGardenProfile: Profile = { style: 'jellyfish', label: 'JELLYFISH GARDEN', variant: 'waveform', background: 'linear-gradient(180deg, #172554, #020617)', titleColor: '#DBEAFE', coverRadius: 999, circleCover: true }
 export const radioTowerProfile: Profile = { style: 'radio', label: 'RADIO TOWER', variant: 'dashboard', background: 'linear-gradient(135deg, #111827, #312E81)', titleColor: '#FEF3C7', coverRadius: 20 }

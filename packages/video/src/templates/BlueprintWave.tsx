@@ -63,7 +63,7 @@ export function BlueprintWave({ config }: { config: LyricVideoConfig }) {
         </svg>
         <CaptionPanel
           config={config}
-          text={`${config.title ?? 'LyricPulse'} / ${lyricLine?.text ?? 'Blueprint'}`}
+          text={lyricLine?.text}
           left={isWide ? 660 : 76}
           right={isWide ? 120 : 76}
           top={isWide ? 500 : 1040}

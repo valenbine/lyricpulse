@@ -156,7 +156,7 @@ export function HeroSplit({ config }: { config: LyricVideoConfig }) {
             transformOrigin: 'top left'
           }}
         >
-          {config.artist ?? 'Unknown Artist'}
+          {config.artist ?? ' '}
         </div>
         <div
           style={{
@@ -179,7 +179,7 @@ export function HeroSplit({ config }: { config: LyricVideoConfig }) {
             transformOrigin: 'top left'
           }}
         >
-          {config.title ?? 'Untitled Track'}
+          {config.title ?? ' '}
         </div>
         <div
           style={{

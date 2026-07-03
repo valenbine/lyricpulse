@@ -60,7 +60,7 @@ export function PrismGrid({ config }: { config: LyricVideoConfig }) {
             textTransform: 'uppercase'
           }}
         >
-          {config.title ?? 'LyricPulse'}
+          {config.title ?? ' '}
         </div>
         <CaptionPanel
           config={config}

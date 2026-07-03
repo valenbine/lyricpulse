@@ -6,6 +6,7 @@ import type {
   LyricVideoTheme,
   Project,
   RenderJob,
+  RenderQuality,
   TemplateDefinition,
   TemplateId,
   VideoRatio
@@ -176,6 +177,7 @@ export async function createRenderJob(
   projectId: string,
   input: {
     ratio: VideoRatio
+    renderQuality?: RenderQuality
     templateId: TemplateId
     title?: string
     artist?: string

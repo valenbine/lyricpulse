@@ -3,6 +3,7 @@ import {
   audioFormats,
   coverFormats,
   lyricFormats,
+  renderQualities,
   renderJobStatuses,
   renderJobSteps,
   templateIds,
@@ -17,6 +18,7 @@ export const audioFormatSchema = z.enum(audioFormats)
 export const lyricFormatSchema = z.enum(lyricFormats)
 export const coverFormatSchema = z.enum(coverFormats)
 export const videoRatioSchema = z.enum(videoRatios)
+export const renderQualitySchema = z.enum(renderQualities)
 export const templateIdSchema = z.enum(templateIds)
 export const renderJobStatusSchema = z.enum(renderJobStatuses)
 export const renderJobStepSchema = z.enum(renderJobSteps)
@@ -134,6 +136,7 @@ export const templateDefinitionSchema = z.object({
 export const lyricVideoConfigSchema = z.object({
   projectId: idSchema,
   ratio: videoRatioSchema,
+  renderQuality: renderQualitySchema.default('standard'),
   templateId: templateIdSchema,
   title: z.string().min(1).optional(),
   artist: z.string().min(1).optional(),

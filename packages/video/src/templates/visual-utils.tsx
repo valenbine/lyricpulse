@@ -202,7 +202,7 @@ export function CaptionPanel({
           ...textStyle
         }}
       >
-        {text ?? 'LyricPulse'}
+        {text ?? ' '}
       </div>
       {accentLine ? (
         <div

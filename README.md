@@ -1,11 +1,11 @@
 # LyricPulse
 
-LyricPulse is a local-first web app for generating dynamic lyric videos from uploaded audio, LRC lyrics, and cover artwork. The first version runs fully on your machine with a React Studio, a Fastify API, Remotion video templates, and FFmpeg-based audio processing.
+LyricPulse is a local-first app for generating dynamic lyric videos from uploaded audio, LRC lyrics, and cover artwork. The first version runs fully on your machine with a React Studio, a Fastify API, Remotion video templates, FFmpeg-based audio processing, and an optional Electron desktop shell for Windows.
 
 ## Features
 
 - Upload MP3, WAV, FLAC, or M4A audio.
-- Upload line-timed LRC lyrics.
+- Upload line-timed LRC lyrics, including UTF-8, UTF-16, and GB18030/GBK encoded files that are normalized to UTF-8 on ingest.
 - Upload JPG, PNG, or WEBP cover artwork.
 - Analyze audio duration and loudness with FFmpeg, with replaceable adapters for BPM, beats, and frequency bands.
 - Edit lyric video settings in a Chinese dark music workstation UI.
@@ -13,9 +13,10 @@ LyricPulse is a local-first web app for generating dynamic lyric videos from upl
 - Store artist metadata as Chinese and English names, then render a combined display label while filtering singer-name lyric lines by the Chinese name.
 - Adjust lyric line timing in Studio with per-line `-0.5s` / `+0.5s`, delete rows, undo edits, and save the updated timeline.
 - Preview and render beat-synced stage lighting, including a shared `stageLighting` intensity control used by both Studio preview and final export.
-- Export MP4 lyric videos in `9:16` and `16:9`.
-- Render with a growing library of Remotion templates, including `PulseCover`, `NeonLyric`, `WaveformStage`, and poster-style variants such as `OrbitWords`.
+- Export standard-quality MP4 lyric videos in `9:16` and `16:9`.
+- Render with a growing library of Remotion templates, including `PulseCover`, `NeonLyric`, `WaveformStage`, `TypewriterNoir`, `RosePostcard`, and poster-style variants such as `OrbitWords`.
 - Keep long renders running in the background and inspect progress, success, or failure from render history.
+- Build a Windows desktop installer from GitHub Actions without changing the existing web deployment flow.
 
 ## Stack
 
@@ -31,6 +32,7 @@ LyricPulse is a local-first web app for generating dynamic lyric videos from upl
 ```text
 apps/web                  React Studio
 apps/api                  Fastify API and render orchestration
+apps/desktop              Electron shell and Windows installer config
 packages/core             Shared types, schemas, and LRC parser
 packages/video            Remotion templates and renderer helper
 packages/audio-analysis   FFmpeg analysis helpers and command runner
@@ -79,6 +81,32 @@ pnpm --filter @lyricpulse/web dev
 
 The Vite dev server proxies `/api` requests to `http://localhost:3001`, so the browser can use the Web Studio as the single entry point.
 
+Start the single-port local preview used by the hosted development environment:
+
+```bash
+pnpm start:single
+```
+
+This serves the built Web Studio from the Fastify API process and keeps API calls on the same port.
+
+## Windows Desktop Installer
+
+The desktop app lives in `apps/desktop`. It wraps the existing Web Studio in Electron, starts the Fastify API on a local loopback port, and stores user data under Electron's `userData` directory instead of the repository `storage` folder.
+
+Build the web assets used by the desktop shell:
+
+```bash
+pnpm --filter @lyricpulse/desktop build
+```
+
+Build a Windows installer locally on Windows:
+
+```bash
+pnpm desktop:win
+```
+
+The GitHub workflow `.github/workflows/windows-desktop.yml` builds the same installer on `windows-latest`. It can be triggered manually from GitHub Actions or by pushing a tag that matches `desktop-v*`. The generated `.exe` is uploaded as the `lyricpulse-windows-installer` artifact.
+
 ## Usage Flow
 
 1. Open the Web Studio.
@@ -88,7 +116,7 @@ The Vite dev server proxies `/api` requests to `http://localhost:3001`, so the b
 5. Choose a template and `9:16` or `16:9` output ratio.
 6. Adjust theme and effect controls, including stage lighting intensity.
 7. Review the lyric timeline and apply per-line timing edits when needed.
-8. Start rendering, leave the job running in the background, and monitor it from render history.
+8. Start a standard-quality render, leave the job running in the background, and monitor it from render history.
 9. Open a completed job to preview or download the generated MP4.
 
 ## Validation

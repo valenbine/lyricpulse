@@ -26,10 +26,10 @@ export function CyberTerminal({ config }: { config: LyricVideoConfig }) {
         <FloatingCover config={config} left={isWide ? 150 : (1080 - coverSize) / 2} top={isWide ? 305 : 250} size={coverSize} radius={10} scale={1 + analysisFrame.bass * 0.04} />
         <div style={{ position: 'absolute', left: isWide ? 650 : 76, right: isWide ? 110 : 76, top: isWide ? 170 : 780, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', color: '#BBF7D0' }}>
           <div style={{ fontSize: isWide ? 72 : 88, fontWeight: 900, letterSpacing: '-0.06em', lineHeight: 1 }}>
-            {config.title ?? 'LyricPulse'}
+            {config.title ?? ' '}
           </div>
           <div style={{ marginTop: isWide ? 60 : 76, padding: '36px 38px', border: `1px solid ${config.theme.accentColor}88`, background: 'rgba(2,6,23,0.78)', fontSize: isWide ? 60 : 76, fontWeight: 900, boxShadow: `0 0 ${30 + analysisFrame.treble * 50}px ${config.theme.accentColor}28` }}>
-            &gt; {lyricLine?.text ?? 'LyricPulse'}
+            &gt; {lyricLine?.text ?? ' '}
           </div>
         </div>
       </div>

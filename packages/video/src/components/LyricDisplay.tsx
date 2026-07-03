@@ -55,7 +55,7 @@ export function LyricDisplay({
             : contrast.lyricShadow
         }}
       >
-        {line?.text ?? 'LyricPulse'}
+        {line?.text ?? ' '}
       </div>
       <div
         style={{

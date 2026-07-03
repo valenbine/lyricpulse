@@ -6,7 +6,7 @@ import {
   getPlaybackTime
 } from '../helpers'
 import { TemplateShell } from '../components/TemplateShell'
-import { isServerRender } from '../render-mode'
+import { isDraftRender, isServerRender } from '../render-mode'
 import { getRandomPosterObjectSettings } from './random-lyric-settings'
 
 type RandomTextStyle = 'poster' | 'outline' | 'sticker' | 'terminal' | 'blueprint' | 'neon' | 'paper'
@@ -149,6 +149,7 @@ function RandomLyricField({
   const analysisFrame = getAnalysisFrame(config.analysis.frames, time)
   const isWide = config.ratio === '16:9'
   const fastRender = isServerRender(config)
+  const draftRender = isDraftRender(config)
   const items = getFieldItems(config.lyrics, currentLine, profile.density)
   const pulse = 1 + analysisFrame.rms * 0.055 * config.effect.beatImpact
   const customObjects = config.customTemplate?.ratioSettings[config.ratio]?.objects
@@ -198,7 +199,7 @@ function RandomLyricField({
               borderRadius: profile.style === 'paper' ? 18 : 42,
               opacity: coverLayout.opacity,
               filter: fastRender ? 'brightness(0.62)' : 'brightness(0.7) saturate(1.1)',
-              boxShadow: '0 28px 90px rgba(0,0,0,0.42)',
+               boxShadow: draftRender ? '0 14px 42px rgba(0,0,0,0.28)' : '0 28px 90px rgba(0,0,0,0.42)',
               transform: coverLayout.scale ? `scale(${coverLayout.scale})` : undefined,
               transformOrigin: 'top left'
             }}
@@ -209,13 +210,13 @@ function RandomLyricField({
           style={{
             position: 'absolute',
             inset: '-12%',
-            opacity: fieldGlowOpacity,
-            background: `radial-gradient(circle at 50% 20%, ${config.theme.accentColor}BB, transparent 30%), radial-gradient(circle at 18% 72%, ${config.theme.primaryColor}88, transparent 34%), radial-gradient(circle at 84% 36%, ${config.theme.accentColor}66, transparent 28%)`,
-            filter: fastRender ? 'blur(28px)' : 'blur(72px)',
-            mixBlendMode: 'screen',
-            pointerEvents: 'none'
-          }}
-        />
+             opacity: draftRender ? fieldGlowOpacity * 0.7 : fieldGlowOpacity,
+             background: `radial-gradient(circle at 50% 20%, ${config.theme.accentColor}BB, transparent 30%), radial-gradient(circle at 18% 72%, ${config.theme.primaryColor}88, transparent 34%), radial-gradient(circle at 84% 36%, ${config.theme.accentColor}66, transparent 28%)`,
+             filter: draftRender ? 'blur(16px)' : fastRender ? 'blur(28px)' : 'blur(72px)',
+             mixBlendMode: draftRender ? 'normal' : 'screen',
+             pointerEvents: 'none'
+           }}
+         />
         <div
           style={{
             position: 'absolute',
@@ -246,7 +247,7 @@ function RandomLyricField({
               letterSpacing: `${titleTypography?.letterSpacing ?? -0.055}em`,
               overflow: 'hidden'
             }}>
-              {config.title ?? 'LyricPulse'}
+              {config.title ?? ' '}
             </div>
             {config.artist ? (
               <div style={{
@@ -336,13 +337,15 @@ function RandomLyricField({
                   borderRadius: profile.style === 'sticker' ? 28 : profile.style === 'terminal' ? 4 : 24,
                   background: treatment.background,
                   border: treatment.border,
-                  boxShadow: item.active && !fastRender
-                    ? `0 30px 130px ${config.theme.accentColor}26, 0 10px 30px rgba(0,0,0,0.3)`
-                    : undefined,
-                  textShadow: profile.style === 'neon'
-                    ? `0 0 ${item.active ? 42 : 18}px ${config.theme.accentColor}`
-                    : item.active && profile.style !== 'paper'
-                      ? '0 8px 0 rgba(0,0,0,0.34)'
+                   boxShadow: item.active && !fastRender && !draftRender
+                     ? `0 30px 130px ${config.theme.accentColor}26, 0 10px 30px rgba(0,0,0,0.3)`
+                     : undefined,
+                   textShadow: draftRender
+                     ? undefined
+                     : profile.style === 'neon'
+                     ? `0 0 ${item.active ? 42 : 18}px ${config.theme.accentColor}`
+                     : item.active && profile.style !== 'paper'
+                       ? '0 8px 0 rgba(0,0,0,0.34)'
                       : undefined,
                   overflow: 'hidden'
                 }}

@@ -45,7 +45,7 @@ export function SunrisePolaroid({ config }: { config: LyricVideoConfig }) {
           scale={1 + analysisFrame.bass * 0.025}
         />
         <div style={{ position: 'absolute', left: isWide ? 690 : 78, right: isWide ? 120 : 78, top: isWide ? 200 : 830, color: '#FFF7ED', fontSize: isWide ? 82 : 92, fontWeight: 950, letterSpacing: '-0.075em', lineHeight: 0.92, textShadow: '0 8px 30px rgba(0,0,0,0.42)' }}>
-          {config.title ?? 'LyricPulse'}
+          {config.title ?? ' '}
         </div>
         <CaptionPanel config={config} text={lyricLine?.text} left={isWide ? 690 : 76} right={isWide ? 120 : 76} top={isWide ? 500 : 1090} align={isWide ? 'left' : 'center'} fontSize={isWide ? 72 : 84} />
       </div>

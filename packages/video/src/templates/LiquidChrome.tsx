@@ -60,7 +60,7 @@ export function LiquidChrome({ config }: { config: LyricVideoConfig }) {
             textShadow: `0 0 42px ${config.theme.accentColor}`
           }}
         >
-          {config.title ?? 'LyricPulse'}
+          {config.title ?? ' '}
         </div>
         <CaptionPanel
           config={config}

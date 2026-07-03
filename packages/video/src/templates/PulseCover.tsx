@@ -119,7 +119,7 @@ export function PulseCover({ config }: { config: LyricVideoConfig }) {
               textShadow: fastRender ? '0 4px 0 rgba(0,0,0,0.68)' : contrast.titleShadow
             }}
           >
-            {config.title ?? 'LyricPulse'}
+            {config.title ?? ' '}
           </div>
           <div
             style={{
@@ -197,7 +197,7 @@ export function PulseCover({ config }: { config: LyricVideoConfig }) {
                   textShadow: fastRender ? '0 3px 0 rgba(0,0,0,0.65)' : contrast.lyricShadow
                 }}
               >
-                {lyricLine?.text ?? 'LyricPulse'}
+                {lyricLine?.text ?? ' '}
               </div>
               <div
                 style={{

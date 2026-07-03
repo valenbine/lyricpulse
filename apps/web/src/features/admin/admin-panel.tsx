@@ -1046,7 +1046,7 @@ function TemplateEditorObjectPreview({
             }em`
           }}
         >
-          {sampleLyrics[1]?.text ?? 'LyricPulse'}
+          {sampleLyrics[1]?.text ?? ' '}
         </div>
         <div className="mx-auto mt-1 h-1 w-16 rounded-full bg-white/80" />
       </div>

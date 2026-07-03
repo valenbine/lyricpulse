@@ -45,6 +45,12 @@ describe('parseLrc', () => {
     ])
   })
 
+  it('renders section labels as empty lyric text', () => {
+    const result = parseLrc('[00:01.00]主歌一\n[00:05.00][副歌]\n[00:09.00]真正歌词')
+
+    expect(result.lines.map((line) => line.text)).toEqual(['', '', '真正歌词'])
+  })
+
   it('reports malformed timestamp line numbers', () => {
     const result = parseLrc('[00:99.00]Bad seconds\n[bad:line]Ignored tag')
 

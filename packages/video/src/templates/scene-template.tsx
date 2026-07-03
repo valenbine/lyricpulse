@@ -103,7 +103,7 @@ export function SceneTemplate({
             textShadow: contrast.titleShadow
           }}
         >
-          {config.title ?? 'LyricPulse'}
+          {config.title ?? ' '}
         </div>
         <div
           style={{
@@ -119,7 +119,7 @@ export function SceneTemplate({
             textTransform: 'uppercase'
           }}
         >
-          {config.artist ?? 'LyricPulse'}
+          {config.artist ?? ' '}
         </div>
         <CaptionPanel
           config={config}
@@ -229,7 +229,7 @@ function SceneDecorations({
 }
 
 function KineticType({ accent, frame, treble }: { accent: string; frame: number; treble: number }) {
-  return <>{['TYPE', 'LYRIC', 'BEAT', 'MOVE'].map((word, index) => <div key={word} style={{ position: 'absolute', left: `${4 + index * 24}%`, top: `${8 + (index % 2) * 46}%`, color: accent, fontSize: 122, fontWeight: 950, letterSpacing: '-0.16em', opacity: 0.2 + treble * 0.2, transform: `rotate(${-10 + index * 7 + Math.sin(frame / 22 + index) * 4}deg)` }}>{word}</div>)}</>
+  return <>{Array.from({ length: 4 }).map((_, index) => <div key={index} style={{ position: 'absolute', left: `${4 + index * 24}%`, top: `${8 + (index % 2) * 46}%`, width: 250, height: 88, borderRadius: 999, border: `16px solid ${accent}`, opacity: 0.2 + treble * 0.2, transform: `rotate(${-10 + index * 7 + Math.sin(frame / 22 + index) * 4}deg)` }} />)}</>
 }
 
 function PolarNight({ accent, frame, bass }: { accent: string; frame: number; bass: number }) {

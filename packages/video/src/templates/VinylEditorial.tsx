@@ -50,19 +50,13 @@ export function VinylEditorial({ config }: { config: LyricVideoConfig }) {
             position: 'absolute',
             left: isWide ? 98 : 62,
             top: isWide ? 126 : 102,
-            fontSize: isWide ? 118 : 128,
-            fontWeight: 950,
-            letterSpacing: '-0.085em',
-            lineHeight: 0.88,
-            color: '#F8FAFC',
+            width: isWide ? 300 : 340,
+            height: isWide ? 210 : 230,
             opacity: 0.08,
-            textTransform: 'uppercase'
+            backgroundImage:
+              'repeating-linear-gradient(0deg, #F8FAFC 0 12px, transparent 12px 28px)'
           }}
-        >
-          LRC
-          <br />
-          GET
-        </div>
+        />
         <div
           style={{
             position: 'absolute',

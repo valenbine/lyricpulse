@@ -2,6 +2,7 @@ export const audioFormats = ['mp3', 'wav', 'flac', 'm4a'] as const
 export const lyricFormats = ['lrc'] as const
 export const coverFormats = ['jpg', 'jpeg', 'png', 'webp'] as const
 export const videoRatios = ['9:16', '16:9'] as const
+export const renderQualities = ['draft', 'standard'] as const
 export const templateIds = [
   'PulseCover',
   'NeonLyric',
@@ -87,6 +88,7 @@ export const templateIds = [
   'BaroqueFrame',
   'SwissGrid',
   'CandyGlass',
+  'RosePostcard',
   'IndustrialFurnace',
   'JellyfishGarden',
   'RadioTower',
@@ -233,6 +235,7 @@ export type AudioFormat = (typeof audioFormats)[number]
 export type LyricFormat = (typeof lyricFormats)[number]
 export type CoverFormat = (typeof coverFormats)[number]
 export type VideoRatio = (typeof videoRatios)[number]
+export type RenderQuality = (typeof renderQualities)[number]
 export type TemplateId = (typeof templateIds)[number]
 export type RenderJobStatus = (typeof renderJobStatuses)[number]
 export type RenderJobStep = (typeof renderJobSteps)[number]
@@ -362,6 +365,7 @@ export type TemplateDefinition = {
 export type LyricVideoConfig = {
   projectId: string
   ratio: VideoRatio
+  renderQuality?: RenderQuality
   templateId: TemplateId
   title?: string
   artist?: string

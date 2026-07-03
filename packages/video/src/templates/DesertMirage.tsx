@@ -25,7 +25,7 @@ export function DesertMirage({ config }: { config: LyricVideoConfig }) {
         ))}
         <FloatingCover config={config} left={isWide ? 170 : (1080 - coverSize) / 2} top={isWide ? 265 : 240} size={coverSize} radius={999} circle scale={1 + analysisFrame.bass * 0.025} />
         <div style={{ position: 'absolute', left: isWide ? 700 : 82, right: isWide ? 120 : 82, top: isWide ? 190 : 800, color: '#FFF7ED', fontSize: isWide ? 86 : 100, fontWeight: 950, letterSpacing: '-0.08em', lineHeight: 0.9, textShadow: '0 8px 26px rgba(0,0,0,0.42)' }}>
-          {config.title ?? 'LyricPulse'}
+          {config.title ?? ' '}
         </div>
         <CaptionPanel config={config} text={lyricLine?.text} left={isWide ? 700 : 76} right={isWide ? 120 : 76} top={isWide ? 500 : 1080} align={isWide ? 'left' : 'center'} fontSize={isWide ? 72 : 86} />
       </div>

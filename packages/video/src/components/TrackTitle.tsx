@@ -49,7 +49,7 @@ export function TrackTitle({
             : contrast.titleShadow
         }}
       >
-        {config.title ?? 'LyricPulse'}
+        {config.title ?? ' '}
       </div>
       {hasArtist ? (
         <div

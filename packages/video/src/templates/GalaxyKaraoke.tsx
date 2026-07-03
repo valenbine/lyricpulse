@@ -91,7 +91,7 @@ export function GalaxyKaraoke({ config }: { config: LyricVideoConfig }) {
               textShadow: `0 0 ${28 + analysisFrame.treble * 40}px ${config.theme.accentColor}`
             }}
           >
-            {lyricLine?.text ?? 'LyricPulse'}
+            {lyricLine?.text ?? ' '}
           </div>
         </div>
       </div>
