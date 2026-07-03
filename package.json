@@ -12,6 +12,7 @@
     "test": "turbo test",
     "typecheck": "turbo typecheck",
     "start:single": "WEB_DIST_ROOT=../../apps/web/dist RENDER_TIMEOUT_MS=0 DEV_KEEPALIVE_INTERVAL_MS=60000 pnpm --filter @lyricpulse/api dev",
+    "desktop:win": "pnpm --filter @lyricpulse/desktop dist:win",
     "format": "prettier --check .",
     "format:write": "prettier --write ."
   },

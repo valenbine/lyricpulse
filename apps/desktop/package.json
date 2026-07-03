@@ -1,0 +1,90 @@
+{
+  "name": "@lyricpulse/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/main.mjs",
+  "description": "Windows desktop shell for LyricPulse.",
+  "scripts": {
+    "build": "pnpm --filter @lyricpulse/web build",
+    "dist:win": "electron-builder --win nsis --x64",
+    "pack:win": "electron-builder --win dir --x64"
+  },
+  "dependencies": {
+    "@lyricpulse/api": "workspace:*",
+    "@lyricpulse/audio-analysis": "workspace:*",
+    "@lyricpulse/core": "workspace:*",
+    "@lyricpulse/video": "workspace:*",
+    "tsx": "^4.21.0"
+  },
+  "devDependencies": {
+    "electron": "^39.2.7",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.lyricpulse.desktop",
+    "productName": "LyricPulse",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      {
+        "from": ".",
+        "to": "apps/desktop",
+        "filter": ["package.json", "src/**/*"]
+      },
+      {
+        "from": "../../apps/api",
+        "to": "apps/api",
+        "filter": ["package.json", "src/**/*"]
+      },
+      {
+        "from": "../../apps/web",
+        "to": "apps/web",
+        "filter": ["dist/**/*"]
+      },
+      {
+        "from": "../../packages/audio-analysis",
+        "to": "packages/audio-analysis",
+        "filter": ["package.json", "src/**/*"]
+      },
+      {
+        "from": "../../packages/core",
+        "to": "packages/core",
+        "filter": ["package.json", "src/**/*"]
+      },
+      {
+        "from": "../../packages/video",
+        "to": "packages/video",
+        "filter": ["package.json", "src/**/*"]
+      },
+      {
+        "from": "../..",
+        "to": ".",
+        "filter": ["package.json", "tsconfig.base.json"]
+      }
+    ],
+    "extraMetadata": {
+      "main": "apps/desktop/src/main.mjs"
+    },
+    "asarUnpack": [
+      "apps/web/dist/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "artifactName": "LyricPulse-${version}-Windows-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}
