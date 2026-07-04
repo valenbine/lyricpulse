@@ -1,7 +1,7 @@
 import { app, BrowserWindow, dialog, shell } from 'electron'
 import { mkdir } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { tsImport } from 'tsx/esm/api'
 
 const currentDir = dirname(fileURLToPath(import.meta.url))
@@ -16,7 +16,7 @@ async function startApiServer() {
   await mkdir(storageRoot, { recursive: true })
 
   const { buildApp } = await tsImport(
-    resolve(repoRoot, 'apps/api/src/app.ts'),
+    pathToFileURL(resolve(repoRoot, 'apps/api/src/app.ts')).href,
     import.meta.url
   )
   const server = buildApp({ storageRoot, webDistRoot })
