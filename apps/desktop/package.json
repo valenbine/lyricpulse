@@ -61,7 +61,7 @@
       {
         "from": "../..",
         "to": ".",
-        "filter": ["package.json", "tsconfig.base.json"]
+        "filter": ["tsconfig.base.json"]
       }
     ],
     "asarUnpack": [
