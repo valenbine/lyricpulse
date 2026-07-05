@@ -1,5 +1,5 @@
 import { app, BrowserWindow, dialog, shell } from 'electron'
-import { mkdir } from 'node:fs/promises'
+import { appendFile, mkdir, stat } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { tsImport } from 'tsx/esm/api'
@@ -9,6 +9,28 @@ const repoRoot = app.isPackaged ? resolve(currentDir, '..') : resolve(currentDir
 
 let apiServer
 let mainWindow
+let logFilePath
+
+async function writeDesktopLog(message, details) {
+  const targetPath = logFilePath ?? join(app.getPath('userData'), 'desktop.log')
+  const payload = details ? ` ${JSON.stringify(details)}` : ''
+
+  try {
+    await mkdir(dirname(targetPath), { recursive: true })
+    await appendFile(targetPath, `[${new Date().toISOString()}] ${message}${payload}\n`)
+  } catch {
+    // Logging must never block startup.
+  }
+}
+
+async function pathExists(path) {
+  try {
+    await stat(path)
+    return true
+  } catch {
+    return false
+  }
+}
 
 function configurePackagedBinaryPaths() {
   if (!app.isPackaged || process.platform !== 'win32') {
@@ -25,10 +47,41 @@ function configurePackagedBinaryPaths() {
   )
 }
 
+async function getWebDistRoot() {
+  if (!app.isPackaged) {
+    return resolve(repoRoot, 'apps/web/dist')
+  }
+
+  const unpackedWebDistRoot = join(
+    process.resourcesPath,
+    'app.asar.unpacked',
+    'apps',
+    'web',
+    'dist'
+  )
+
+  if (await pathExists(join(unpackedWebDistRoot, 'index.html'))) {
+    return unpackedWebDistRoot
+  }
+
+  return resolve(repoRoot, 'apps/web/dist')
+}
+
+async function assertWebDistRoot(webDistRoot) {
+  await stat(join(webDistRoot, 'index.html'))
+}
+
 async function startApiServer() {
   const storageRoot = join(app.getPath('userData'), 'storage')
-  const webDistRoot = resolve(repoRoot, 'apps/web/dist')
+  const webDistRoot = await getWebDistRoot()
   await mkdir(storageRoot, { recursive: true })
+  await assertWebDistRoot(webDistRoot)
+  await writeDesktopLog('Starting local API server.', {
+    isPackaged: app.isPackaged,
+    repoRoot,
+    storageRoot,
+    webDistRoot
+  })
 
   const { buildApp } = await tsImport(
     pathToFileURL(resolve(repoRoot, 'apps/api/src/app.ts')).href,
@@ -46,6 +99,34 @@ async function startApiServer() {
     server,
     url: `http://127.0.0.1:${address.port}`
   }
+}
+
+function attachRendererDiagnostics(window) {
+  window.webContents.on('console-message', (_event, ...args) => {
+    void writeDesktopLog('Renderer console message.', { args })
+  })
+
+  window.webContents.on(
+    'did-fail-load',
+    (_event, errorCode, errorDescription, validatedURL, isMainFrame) => {
+      void writeDesktopLog('Renderer failed to load.', {
+        errorCode,
+        errorDescription,
+        validatedURL,
+        isMainFrame
+      })
+    }
+  )
+
+  window.webContents.on('render-process-gone', (_event, details) => {
+    void writeDesktopLog('Renderer process ended.', details)
+  })
+
+  window.webContents.on('did-finish-load', () => {
+    void writeDesktopLog('Renderer finished loading.', {
+      url: window.webContents.getURL()
+    })
+  })
 }
 
 async function createMainWindow(appUrl) {
@@ -72,12 +153,23 @@ async function createMainWindow(appUrl) {
     return { action: 'deny' }
   })
 
+  attachRendererDiagnostics(mainWindow)
+
   await mainWindow.loadURL(appUrl)
 }
 
 async function bootstrap() {
+  logFilePath = join(app.getPath('userData'), 'desktop.log')
   configurePackagedBinaryPaths()
+  await writeDesktopLog('Bootstrapping LyricPulse desktop.', {
+    isPackaged: app.isPackaged,
+    resourcesPath: process.resourcesPath,
+    esbuildBinaryPath: process.env.ESBUILD_BINARY_PATH
+  })
   apiServer = await startApiServer()
+  await writeDesktopLog('Local API server is listening.', {
+    url: apiServer.url
+  })
   await createMainWindow(apiServer.url)
 }
 
