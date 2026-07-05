@@ -1,6 +1,6 @@
 import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
-import { extname, join, normalize, relative, resolve, sep } from 'node:path'
+import { extname, join, relative, resolve, sep } from 'node:path'
 import multipart from '@fastify/multipart'
 import type { Multipart } from '@fastify/multipart'
 import Fastify from 'fastify'
@@ -616,7 +616,12 @@ function readMultipartFieldValue(field: Multipart | Multipart[] | undefined) {
 
 async function resolveStaticFile(webDistRoot: string, urlPath: string) {
   const root = resolve(webDistRoot)
-  const cleanPath = normalize(decodeURIComponent(urlPath)).replace(/^\/+/, '')
+  const cleanPath = getSafeStaticUrlPath(urlPath)
+
+  if (cleanPath === undefined) {
+    return undefined
+  }
+
   const requestedPath = resolve(root, cleanPath || 'index.html')
 
   if (!isPathInside(root, requestedPath)) {
@@ -634,6 +639,23 @@ async function resolveStaticFile(webDistRoot: string, urlPath: string) {
   }
 
   return undefined
+}
+
+function getSafeStaticUrlPath(urlPath: string) {
+  try {
+    const segments = urlPath
+      .split('/')
+      .map((segment) => decodeURIComponent(segment))
+      .filter(Boolean)
+
+    if (segments.some((segment) => segment === '..' || segment.includes('\\'))) {
+      return undefined
+    }
+
+    return segments.join('/')
+  } catch {
+    return undefined
+  }
 }
 
 function isPathInside(root: string, target: string) {
