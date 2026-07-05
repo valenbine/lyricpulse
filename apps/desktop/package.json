@@ -65,7 +65,10 @@
       }
     ],
     "asarUnpack": [
-      "apps/web/dist/**/*"
+      "apps/web/dist/**/*",
+      "node_modules/@esbuild/**/*",
+      "node_modules/esbuild/**/*",
+      "node_modules/@remotion/compositor-*/*"
     ],
     "win": {
       "target": [
