@@ -10,6 +10,21 @@ const repoRoot = app.isPackaged ? resolve(currentDir, '..') : resolve(currentDir
 let apiServer
 let mainWindow
 
+function configurePackagedBinaryPaths() {
+  if (!app.isPackaged || process.platform !== 'win32') {
+    return
+  }
+
+  process.env.ESBUILD_BINARY_PATH ??= join(
+    process.resourcesPath,
+    'app.asar.unpacked',
+    'node_modules',
+    '@esbuild',
+    'win32-x64',
+    'esbuild.exe'
+  )
+}
+
 async function startApiServer() {
   const storageRoot = join(app.getPath('userData'), 'storage')
   const webDistRoot = resolve(repoRoot, 'apps/web/dist')
@@ -61,6 +76,7 @@ async function createMainWindow(appUrl) {
 }
 
 async function bootstrap() {
+  configurePackagedBinaryPaths()
   apiServer = await startApiServer()
   await createMainWindow(apiServer.url)
 }
