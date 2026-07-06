@@ -37,9 +37,15 @@ jobs:
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
 
+      - name: List desktop artifacts
+        shell: pwsh
+        run: Get-ChildItem -Path apps/desktop/dist -Recurse | Select-Object FullName, Length
+
       - name: Upload installer artifact
         uses: actions/upload-artifact@v4
         with:
           name: lyricpulse-windows-installer
-          path: apps/desktop/dist/*.exe
+          path: |
+            apps/desktop/dist/*.exe
+            apps/desktop/dist/*.zip
           if-no-files-found: error
