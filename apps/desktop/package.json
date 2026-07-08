@@ -64,6 +64,38 @@
         "filter": ["tsconfig.base.json"]
       }
     ],
+    "extraResources": [
+      {
+        "from": "../../apps/api",
+        "to": "runtime/apps/api",
+        "filter": ["package.json", "src/**/*"]
+      },
+      {
+        "from": "../../apps/web",
+        "to": "runtime/apps/web",
+        "filter": ["dist/**/*"]
+      },
+      {
+        "from": "../../packages/audio-analysis",
+        "to": "runtime/node_modules/@lyricpulse/audio-analysis",
+        "filter": ["package.json", "src/**/*"]
+      },
+      {
+        "from": "../../packages/core",
+        "to": "runtime/node_modules/@lyricpulse/core",
+        "filter": ["package.json", "src/**/*"]
+      },
+      {
+        "from": "../../packages/video",
+        "to": "runtime/node_modules/@lyricpulse/video",
+        "filter": ["package.json", "src/**/*"]
+      },
+      {
+        "from": "../..",
+        "to": "runtime",
+        "filter": ["tsconfig.base.json"]
+      }
+    ],
     "asarUnpack": [
       "apps/web/dist/**/*",
       "node_modules/@esbuild/**/*",

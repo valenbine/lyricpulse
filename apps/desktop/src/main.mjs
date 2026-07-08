@@ -5,7 +5,10 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { tsImport } from 'tsx/esm/api'
 
 const currentDir = dirname(fileURLToPath(import.meta.url))
-const repoRoot = app.isPackaged ? resolve(currentDir, '..') : resolve(currentDir, '../../..')
+const appRoot = app.isPackaged ? resolve(currentDir, '..') : resolve(currentDir, '../../..')
+const sourceRoot = app.isPackaged
+  ? join(process.resourcesPath, 'runtime')
+  : appRoot
 
 let apiServer
 let mainWindow
@@ -49,12 +52,12 @@ function configurePackagedBinaryPaths() {
 
 async function getWebDistRoot() {
   if (!app.isPackaged) {
-    return resolve(repoRoot, 'apps/web/dist')
+    return resolve(sourceRoot, 'apps/web/dist')
   }
 
   const unpackedWebDistRoot = join(
     process.resourcesPath,
-    'app.asar.unpacked',
+    'runtime',
     'apps',
     'web',
     'dist'
@@ -64,7 +67,7 @@ async function getWebDistRoot() {
     return unpackedWebDistRoot
   }
 
-  return resolve(repoRoot, 'apps/web/dist')
+  return resolve(appRoot, 'apps/web/dist')
 }
 
 async function assertWebDistRoot(webDistRoot) {
@@ -78,13 +81,14 @@ async function startApiServer() {
   await assertWebDistRoot(webDistRoot)
   await writeDesktopLog('Starting local API server.', {
     isPackaged: app.isPackaged,
-    repoRoot,
+    appRoot,
+    sourceRoot,
     storageRoot,
     webDistRoot
   })
 
   const { buildApp } = await tsImport(
-    pathToFileURL(resolve(repoRoot, 'apps/api/src/app.ts')).href,
+    pathToFileURL(resolve(sourceRoot, 'apps/api/src/app.ts')).href,
     import.meta.url
   )
   const server = buildApp({ storageRoot, webDistRoot })
